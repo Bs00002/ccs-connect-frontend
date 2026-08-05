@@ -148,6 +148,10 @@ def seed_data():
         if status in [OrderStatus.APPROVED, OrderStatus.DELIVERED]:
              OrderTimeline.objects.create(order=order, status=OrderStatus.APPROVED, created_by=User.objects.filter(is_superuser=True).first() or creator)
 
+    from django.core.management import call_command
+    print("Creating Demo Users...")
+    call_command("create_demo_users")
+
     print("Seeding Complete!")
 
 if __name__ == "__main__":
