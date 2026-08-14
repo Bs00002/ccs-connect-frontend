@@ -4,7 +4,6 @@ export const dealerMetrics = [
   { label: 'Invoices', value: '8', accent: 'from-sky-500 to-indigo-500' },
   { label: 'Products', value: '54', accent: 'from-violet-500 to-fuchsia-500' },
   { label: 'Recent Purchases', value: '12', accent: 'from-lime-500 to-emerald-500' },
-  { label: 'Notifications', value: '5 new', accent: 'from-slate-500 to-slate-700' },
 ]
 
 export const dealerCategories = [
@@ -113,9 +112,3 @@ export const dealerSupportTickets = [
   { id: 'TCK-2091', issue: 'Return request', status: 'Pending', created: '13 Jul 2026', images: 1 },
 ]
 
-export const dealerNotifications = [
-  { title: 'New product launch', detail: 'SoilBoost Pro now available in 5 kg packs.', tag: 'New product' },
-  { title: 'Scheme update', detail: 'Earn additional margin with this week’s bundling offer.', tag: 'Offer' },
-  { title: 'Dispatch update', detail: 'ORD-5489 is scheduled for dispatch tomorrow.', tag: 'Dispatch' },
-  { title: 'Invoice ready', detail: 'INV-9184 is generated and ready to download.', tag: 'Invoice' },
-]

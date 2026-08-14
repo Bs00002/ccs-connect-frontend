@@ -25,16 +25,16 @@ export default function Default(colors) {
 
   return {
     primary: {
-      lighter: '#d1fae5',
-      100: '#a7f3d0',
-      200: '#6ee7b7',
-      light: '#34d399',
-      400: '#10B981', // Vivid Emerald Green
-      main: '#059669',
-      dark: '#047857',
-      700: '#065f46',
-      darker: '#064e3b',
-      900: '#0F291E', // Deep Forest
+      lighter: '#E8F5E9',
+      100: '#C8E6C9',
+      200: '#A5D6A7',
+      light: '#81C784',
+      400: '#4CAF50',
+      main: '#2E7D32', // Chitra Primary Green
+      dark: '#1B5E20', // Chitra Dark Green
+      700: '#144317',
+      darker: '#0B290E',
+      900: '#071A09',
       contrastText: '#fff'
     },
     secondary: {

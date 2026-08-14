@@ -113,7 +113,7 @@ class UserManagementListView(APIView):
             return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
             
         qs = User.objects.all().order_by('-created_at')
-        from .serializers import UserSerializer
+        from ..serializers import UserSerializer
         return Response(UserSerializer(qs, many=True).data)
 
     def post(self, request):
@@ -150,7 +150,7 @@ class UserManagementListView(APIView):
                 profile.territory = request.data.get('territory')
                 profile.save()
                 
-            from .serializers import UserSerializer
+            from ..serializers import UserSerializer
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -165,7 +165,7 @@ class UserManagementDetailView(APIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
             
-        from .serializers import UserSerializer
+        from ..serializers import UserSerializer
         return Response(UserSerializer(user).data)
         
     def put(self, request, user_id):

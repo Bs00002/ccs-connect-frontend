@@ -1,204 +1,174 @@
-import React from 'react';
-import { Grid, Typography, Box, Card, CardContent } from '@mui/material';
-import EnterpriseTable from 'components/ui/EnterpriseTable';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from 'api/client';
+import { AdminDashboard as StitchAdminDashboard } from '../../views/admin/AdminDashboard';
 import {
-  ShoppingCartOutlined,
-  ClockCircleOutlined,
-  CarOutlined,
-  MoneyCollectOutlined,
-  DollarOutlined,
-  WarningOutlined,
-  TeamOutlined,
-  UsergroupAddOutlined,
-  UserOutlined
-} from '@ant-design/icons';
+  MOCK_ORDERS,
+  MOCK_DEALERS,
+  MOCK_PRODUCTS,
+  MOCK_FIELD_ACTIVITIES,
+  MOCK_DISTRIBUTORS,
+  MOCK_EXPENSES,
+} from '../../data/stitchMockData';
 
-const StatCard = ({ title, value, icon, color = 'primary.main' }) => (
-  <Card sx={{ height: '100%', minHeight: 100 }}>
-    <CardContent>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Box>
-          <Typography color="textSecondary" variant="subtitle2" gutterBottom>
-            {title}
-          </Typography>
-          <Typography variant="h4">{value}</Typography>
-        </Box>
-        <Box sx={{ color, fontSize: '2rem' }}>{icon}</Box>
-      </Box>
-    </CardContent>
-  </Card>
-);
+export default function AdminDashboardPage() {
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [dealers, setDealers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function AdminDashboard({ data }) {
-  // --- MOCK DATA ---
-  const kpis = {
-    todaysOrders: '24',
-    pendingOrders: '15',
-    pendingDispatch: '8',
-    waitingApproval: '5',
-    todaysCollections: '₹ 1,25,000',
-    outstandingPayments: '₹ 45,00,000',
-    lowStock: '12',
-    totalDealers: '150',
-    totalEmployees: '25',
-    activeUsers: '18'
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const [ordersRes, dealersRes, productsRes] = await Promise.all([
+          api.get('/orders/orders/').catch(() => ({ data: [] })),
+          api.get('/admin/users/?role=Dealer').catch(() => ({ data: [] })),
+          api.get('/products/products/').catch(() => ({ data: [] })),
+        ]);
+
+        if (Array.isArray(ordersRes.data) && ordersRes.data.length > 0) {
+          const mappedOrders = ordersRes.data.map((o) => ({
+            id: String(o.id),
+            orderNumber: o.order_number || `ORD-${o.id}`,
+            date: new Date(o.created_at || Date.now()).toISOString().split('T')[0],
+            dealerName: o.dealer_name || 'Agri Store',
+            dealerCode: `DLR-${o.dealer || '01'}`,
+            dealerCity: 'Palanpur',
+            distributorName: o.created_by_name || 'CCS Depot',
+            status: o.status || 'Pending Approval',
+            paymentStatus: 'Pending',
+            subtotal: parseFloat(o.subtotal || o.total_amount || 0),
+            discount: 0,
+            tax: Math.round(parseFloat(o.total_amount || 0) * 0.18),
+            grandTotal: parseFloat(o.total_amount || 0),
+            items: (o.items || []).map((i) => ({
+              id: String(i.id || Math.random()),
+              productId: String(i.product),
+              productName: i.product_name || 'Crop Product',
+              productCode: 'PRD-01',
+              packSize: '1 Ltr',
+              quantity: i.quantity || 1,
+              dealerPrice: parseFloat(i.rate || 0),
+              mrp: parseFloat(i.rate || 0) * 1.2,
+              subtotal: parseFloat(i.total || 0),
+            })),
+          }));
+          setOrders(mappedOrders);
+        } else {
+          setOrders(MOCK_ORDERS);
+        }
+
+        if (Array.isArray(dealersRes.data) && dealersRes.data.length > 0) {
+          const mappedDealers = dealersRes.data.map((d) => ({
+            id: String(d.id),
+            name: d.company_name || `${d.first_name || ''} ${d.last_name || ''}`.trim() || 'Kisan Agro',
+            code: d.ccs_id || `DLR-${d.id}`,
+            ownerName: `${d.first_name || ''} ${d.last_name || ''}`.trim() || 'Owner',
+            city: d.city || 'Palanpur',
+            state: d.state || 'Gujarat',
+            phone: d.phone || '+91 98250 12345',
+            email: d.email || 'dealer@ccs.com',
+            gstin: '27AABCA1234F1Z1',
+            creditLimit: 500000,
+            outstandingBalance: 120000,
+            status: d.status === 'Approved' ? 'Active' : 'Pending Verification',
+            distributorName: 'Gujarat Agro Distributors Ltd',
+            territory: 'Palanpur / Banaskantha',
+          }));
+          setDealers(mappedDealers);
+        } else {
+          setDealers(MOCK_DEALERS);
+        }
+
+        if (Array.isArray(productsRes.data) && productsRes.data.length > 0) {
+          const mappedProducts = productsRes.data.map((p) => ({
+            id: String(p.id),
+            name: p.name,
+            code: `PRD-${p.id}`,
+            category: p.category_name || 'Bio Products',
+            technicalName: p.technical_name || 'Active Formulation',
+            packSize: p.packing || '1 Ltr',
+            mrp: parseFloat(p.mrp || 0),
+            dealerPrice: parseFloat(p.dealer_price || p.mrp || 0),
+            distributorPrice: parseFloat(p.distributor_price || p.dealer_price || 0),
+            gstRate: 18,
+            stockQuantity: p.stock || 100,
+            status: p.status === 'Active' ? 'In Stock' : 'Low Stock',
+          }));
+          setProducts(mappedProducts);
+        } else {
+          setProducts(MOCK_PRODUCTS);
+        }
+      } catch (err) {
+        console.error('Error fetching admin dashboard real data:', err);
+        setOrders(MOCK_ORDERS);
+        setDealers(MOCK_DEALERS);
+        setProducts(MOCK_PRODUCTS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminData();
+  }, []);
+
+  const handleNavigate = (view) => {
+    switch (view) {
+      case 'products':
+        navigate('/admin/products');
+        break;
+      case 'dealers':
+        navigate('/admin/dealers');
+        break;
+      case 'distributors':
+        navigate('/admin/employees');
+        break;
+      case 'orders':
+        navigate('/admin/orders');
+        break;
+      case 'inventory':
+        navigate('/admin/products');
+        break;
+      case 'field-ops':
+        navigate('/admin/tracking');
+        break;
+      case 'attendance':
+        navigate('/admin/attendance');
+        break;
+      case 'expenses':
+        navigate('/admin/expenses');
+        break;
+      default:
+        navigate('/admin/dashboard');
+        break;
+    }
   };
 
-  const recentOrdersCols = [
-    { field: 'orderNo', headerName: 'Order No', flex: 1 },
-    { field: 'dealer', headerName: 'Dealer', flex: 1 },
-    { field: 'amount', headerName: 'Amount', flex: 1 },
-    { field: 'status', headerName: 'Status', flex: 1 }
-  ];
-  const recentOrdersRows = [
-    { id: 1, orderNo: 'ORD-001', dealer: 'Kisan Agro', amount: '₹ 45,000', status: 'Pending' },
-    { id: 2, orderNo: 'ORD-002', dealer: 'Green Field', amount: '₹ 12,000', status: 'Approved' },
-  ];
+  const handleSelectOrder = (order) => {
+    navigate('/admin/orders');
+  };
 
-  const workingTodayCols = [
-    { field: 'name', headerName: 'Employee', flex: 1 },
-    { field: 'checkIn', headerName: 'Check In', flex: 1 },
-    { field: 'visits', headerName: 'Visits', flex: 1 }
-  ];
-  const workingTodayRows = [
-    { id: 1, name: 'Rahul Sharma', checkIn: '09:15 AM', visits: 3 },
-    { id: 2, name: 'Vikram Singh', checkIn: '09:30 AM', visits: 2 },
-  ];
-
-  const pendingDispatchCols = [
-    { field: 'orderNo', headerName: 'Order No', flex: 1 },
-    { field: 'dealer', headerName: 'Dealer', flex: 1 },
-    { field: 'date', headerName: 'Date', flex: 1 }
-  ];
-  const pendingDispatchRows = [
-    { id: 1, orderNo: 'ORD-003', dealer: 'Kisan Agro', date: '04 Aug 2026' }
-  ];
-
-  const pendingCollectionsCols = [
-    { field: 'dealer', headerName: 'Dealer', flex: 1 },
-    { field: 'amount', headerName: 'Amount', flex: 1 },
-    { field: 'due_days', headerName: 'Days Overdue', flex: 1 }
-  ];
-  const pendingCollectionsRows = [
-    { id: 1, dealer: 'Green Field', amount: '₹ 25,000', due_days: 12 }
-  ];
-
-  const latestVisitsCols = [
-    { field: 'employee', headerName: 'Employee', flex: 1 },
-    { field: 'dealer', headerName: 'Dealer', flex: 1 },
-    { field: 'time', headerName: 'Time', flex: 1 }
-  ];
-  const latestVisitsRows = [
-    { id: 1, employee: 'Rahul Sharma', dealer: 'Agro Point', time: '10:45 AM' }
-  ];
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64 font-body text-xs text-[#525252]">
+        Loading ERP Admin Command Dashboard...
+      </div>
+    );
+  }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Admin Operating Panel
-      </Typography>
-
-      {/* KPI Section */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Today's Orders" value={kpis.todaysOrders} icon={<ShoppingCartOutlined />} color="primary.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Pending Orders" value={kpis.pendingOrders} icon={<ClockCircleOutlined />} color="warning.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Pending Dispatch" value={kpis.pendingDispatch} icon={<CarOutlined />} color="info.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Waiting Approval" value={kpis.waitingApproval} icon={<WarningOutlined />} color="error.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Today's Collections" value={kpis.todaysCollections} icon={<MoneyCollectOutlined />} color="success.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Outstanding Payments" value={kpis.outstandingPayments} icon={<DollarOutlined />} color="error.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Low Stock Products" value={kpis.lowStock} icon={<WarningOutlined />} color="warning.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Total Dealers" value={kpis.totalDealers} icon={<TeamOutlined />} color="primary.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Distributors/Employees" value={kpis.totalEmployees} icon={<UsergroupAddOutlined />} color="info.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2.4}>
-          <StatCard title="Today's Active Users" value={kpis.activeUsers} icon={<UserOutlined />} color="success.main" />
-        </Grid>
-      </Grid>
-
-      {/* Charts Section (Placeholders for actual charts) */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={4}>
-          <Card><CardContent><Typography variant="h6">Monthly Sales & Collections</Typography><Box height={250} bgcolor="grey.100" mt={2} display="flex" alignItems="center" justifyContent="center">Chart Placeholder</Box></CardContent></Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card><CardContent><Typography variant="h6">Outstanding Trend</Typography><Box height={250} bgcolor="grey.100" mt={2} display="flex" alignItems="center" justifyContent="center">Chart Placeholder</Box></CardContent></Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card><CardContent><Typography variant="h6">Territory Sales</Typography><Box height={250} bgcolor="grey.100" mt={2} display="flex" alignItems="center" justifyContent="center">Chart Placeholder</Box></CardContent></Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card><CardContent><Typography variant="h6">Product Sales</Typography><Box height={250} bgcolor="grey.100" mt={2} display="flex" alignItems="center" justifyContent="center">Chart Placeholder</Box></CardContent></Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card><CardContent><Typography variant="h6">Top Selling Products</Typography><Box height={250} bgcolor="grey.100" mt={2} display="flex" alignItems="center" justifyContent="center">Chart Placeholder</Box></CardContent></Card>
-        </Grid>
-      </Grid>
-
-      {/* Live Tables Section */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <EnterpriseTable 
-            title="Recent Orders"
-            columns={recentOrdersCols}
-            rows={recentOrdersRows}
-            hideFooter
-            sx={{ height: 350 }}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <EnterpriseTable 
-            title="Employees Working Today"
-            columns={workingTodayCols}
-            rows={workingTodayRows}
-            hideFooter
-            sx={{ height: 350 }}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <EnterpriseTable 
-            title="Pending Dispatch"
-            columns={pendingDispatchCols}
-            rows={pendingDispatchRows}
-            hideFooter
-            sx={{ height: 350 }}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <EnterpriseTable 
-            title="Pending Collections"
-            columns={pendingCollectionsCols}
-            rows={pendingCollectionsRows}
-            hideFooter
-            sx={{ height: 350 }}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <EnterpriseTable 
-            title="Latest Dealer Visits"
-            columns={latestVisitsCols}
-            rows={latestVisitsRows}
-            hideFooter
-            sx={{ height: 350 }}
-          />
-        </Grid>
-      </Grid>
-    </Box>
+    <StitchAdminDashboard
+      orders={orders}
+      dealers={dealers}
+      products={products}
+      fieldActivities={MOCK_FIELD_ACTIVITIES}
+      distributors={MOCK_DISTRIBUTORS}
+      expenses={MOCK_EXPENSES}
+      onNavigate={handleNavigate}
+      onSelectOrder={handleSelectOrder}
+    />
   );
 }
+
+

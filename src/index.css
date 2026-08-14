@@ -1,39 +1,184 @@
-@import 'tailwindcss';
-@import '@fontsource/plus-jakarta-sans';
-@import '@fontsource/inter';
+@import "tailwindcss";
+@import "@fontsource/plus-jakarta-sans";
+@import "@fontsource/inter";
 
-:root {
-  font-family: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #0f172a;
-  background-color: #F8FAFC;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  :root {
+    --primary-green: #2E7D32;
+    --dark-green: #1B5E20;
+    --light-green: #E8F5E9;
+    --bg-green: #F5FBF6;
+    --success-green: #4CAF50;
+    --accent-green: #81C784;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #F5FBF6;
+    color: #161616;
+  }
 }
 
-* {
-  box-sizing: border-box;
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
 }
 
-html {
-  scroll-behavior: smooth;
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+/* Chitra Crop Science Green Design System Helpers */
+.carbon-card {
+  background-color: #ffffff;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #2E7D32;
+  box-shadow: 0 4px 6px -1px rgba(46, 125, 50, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-button,
-input,
-select {
-  font: inherit;
+.carbon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(46, 125, 50, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
-#root {
-  min-height: 100vh;
+.carbon-btn-primary {
+  background-color: #2E7D32;
+  color: #ffffff;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+}
+
+.carbon-btn-primary:hover {
+  background-color: #1B5E20;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+}
+
+.carbon-btn-secondary {
+  background-color: #E8F5E9;
+  color: #1B5E20;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: 1px solid #A5D6A7;
+}
+
+.carbon-btn-secondary:hover {
+  background-color: #C8E6C9;
+  color: #1B5E20;
+}
+
+.carbon-btn-ghost {
+  color: #2E7D32;
+  border: 1px solid #2E7D32;
+  background-color: transparent;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.carbon-btn-ghost:hover {
+  background-color: #E8F5E9;
+}
+
+/* Status Pill Helpers with Green Branding */
+.pill-success {
+  background-color: #E8F5E9;
+  color: #1B5E20;
+  border: 1px solid #A5D6A7;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pill-processing {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #81C784;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pill-warning {
+  background-color: #FFF8E1;
+  color: #F57F17;
+  border: 1px solid #FFE082;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pill-error {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border: 1px solid #EF9A9A;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5FBF6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A5D6A7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2E7D32;
 }

@@ -8,11 +8,6 @@ class UserRole(models.TextChoices):
     ADMIN = 'Admin', _('Admin')
     DISTRIBUTOR = 'Distributor', _('Distributor')
     DEALER = 'Dealer', _('Dealer')
-    EMPLOYEE = 'Employee', _('Employee')
-    SALES_MANAGER = 'Sales Manager', _('Sales Manager')
-    ACCOUNTANT = 'Accountant', _('Accountant')
-    WAREHOUSE = 'Warehouse', _('Warehouse')
-    SUPPORT = 'Support', _('Support')
 
 class UserStatus(models.TextChoices):
     PENDING = 'Pending', _('Pending')
@@ -100,7 +95,7 @@ class DistributorProfile(models.Model):
     district = models.CharField(max_length=100, blank=True, null=True)
     territory = models.CharField(max_length=100, blank=True, null=True)
     distributor_area = models.CharField(max_length=255, blank=True, null=True)
-    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_distributors', limit_choices_to={'role': UserRole.SALES_MANAGER})
+    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_distributors', limit_choices_to={'role': UserRole.ADMIN})
     
     # Operations
     daily_sales_target = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)

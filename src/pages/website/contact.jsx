@@ -1,11 +1,11 @@
-import { Box, Container, Typography, Grid, Paper, TextField, Button, Stack, Alert } from '@mui/material';
-import { EnvironmentOutlined, PhoneOutlined, MailOutlined, SendOutlined } from '@ant-design/icons';
+import { Box, Container, Typography, Grid, Paper, TextField, Button, Stack, Alert, Fab } from '@mui/material';
+import { EnvironmentOutlined, PhoneOutlined, MailOutlined, SendOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import api from 'api/client';
 
 export default function Contact() {
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', department: 'Sales', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [success, setSuccess] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function Contact() {
     try {
       await api.post('/support/enquiries/', formData);
       setSuccess(true);
-      setFormData({ name: '', email: '', phone: '', department: 'Sales', message: '' });
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (err) {
       setError('Failed to send message. Please try again.');
     } finally {
@@ -26,8 +26,12 @@ export default function Contact() {
     }
   };
 
+  const handleWhatsApp = () => {
+    window.open('https://wa.me/918000450380', '_blank');
+  };
+
   return (
-    <Box sx={{ bgcolor: 'background.default', pb: 10 }}>
+    <Box sx={{ bgcolor: 'background.default', pb: 10, position: 'relative' }}>
       <Helmet>
         <title>Contact Us | Chitra Crop Science</title>
         <meta name="description" content="Get in touch with Chitra Crop Science for inquiries, support, or partnership opportunities." />
@@ -61,14 +65,14 @@ export default function Contact() {
                 <Stack direction="row" spacing={2} alignItems="flex-start">
                   <PhoneOutlined style={{ fontSize: 24, color: '#4ade80' }} />
                   <Box>
-                    <Typography variant="h6" fontWeight="bold">Phone / WhatsApp</Typography>
+                    <Typography variant="h6" fontWeight="bold">Mobile / Phone</Typography>
                     <Typography variant="body1" color="rgba(255,255,255,0.7)">Direct: +91 80004 50380<br/>IndiaMART: +91 79471 53592</Typography>
                   </Box>
                 </Stack>
                 <Stack direction="row" spacing={2} alignItems="flex-start">
                   <MailOutlined style={{ fontSize: 24, color: '#4ade80' }} />
                   <Box>
-                    <Typography variant="h6" fontWeight="bold">Email Addresses</Typography>
+                    <Typography variant="h6" fontWeight="bold">Email</Typography>
                     <Typography variant="body1" color="rgba(255,255,255,0.7)">Sales: chitracropscience22@gmail.com<br/>Support: info@chitracropscience.in</Typography>
                   </Box>
                 </Stack>
@@ -76,6 +80,16 @@ export default function Contact() {
               
               <Typography variant="subtitle1" fontWeight="bold" mt={6} mb={2}>Working Hours</Typography>
               <Typography variant="body2" color="rgba(255,255,255,0.7)">Monday - Saturday: 9:00 AM to 6:00 PM<br/>Sunday: Closed</Typography>
+
+              <Button 
+                variant="outlined" 
+                startIcon={<WhatsAppOutlined />} 
+                onClick={handleWhatsApp}
+                sx={{ mt: 4, color: '#4ade80', borderColor: '#4ade80', '&:hover': { borderColor: '#4ade80', bgcolor: 'rgba(74, 222, 128, 0.1)' } }}
+                fullWidth
+              >
+                Chat on WhatsApp
+              </Button>
             </Paper>
           </Grid>
 
@@ -94,17 +108,13 @@ export default function Contact() {
                     <TextField fullWidth label="Your Name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
+                    <TextField fullWidth label="Mobile Number" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
                     <TextField fullWidth label="Your Email" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Phone Number" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField fullWidth select SelectProps={{ native: true }} label="Department" value={formData.department} onChange={e => setFormData({...formData, department: e.target.value})}>
-                      {['Sales', 'Dealer Support', 'Technical Agronomy', 'General Enquiry'].map(dept => (
-                        <option key={dept} value={dept}>{dept}</option>
-                      ))}
-                    </TextField>
+                    <TextField fullWidth label="Subject" required value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
                   </Grid>
                   <Grid item xs={12}>
                     <TextField fullWidth label="Your Message" multiline rows={4} required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} />
@@ -135,6 +145,16 @@ export default function Contact() {
           title="Chitra Crop Science Location"
         ></iframe>
       </Box>
+
+      {/* Floating WhatsApp Button */}
+      <Fab 
+        color="success" 
+        aria-label="whatsapp" 
+        sx={{ position: 'fixed', bottom: 32, right: 32, bgcolor: '#25D366', '&:hover': { bgcolor: '#128C7E' } }}
+        onClick={handleWhatsApp}
+      >
+        <WhatsAppOutlined style={{ fontSize: 32, color: 'white' }} />
+      </Fab>
     </Box>
   );
 }

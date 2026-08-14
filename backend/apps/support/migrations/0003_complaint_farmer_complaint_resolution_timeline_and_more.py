@@ -9,16 +9,10 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('farmers', '0001_initial'),
         ('support', '0002_enquiry'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='complaint',
-            name='farmer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='complaints', to='farmers.farmerprofile'),
-        ),
         migrations.AddField(
             model_name='complaint',
             name='resolution_timeline',

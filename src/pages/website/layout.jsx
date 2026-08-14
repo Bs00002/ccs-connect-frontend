@@ -1,11 +1,17 @@
-import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom';
-import { Box, AppBar, Toolbar, Typography, Button, Container, Stack, Grid, IconButton, Divider, Link as MuiLink } from '@mui/material';
-import { FacebookOutlined, TwitterOutlined, InstagramOutlined, LinkedinOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
+import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom';
+import { Box, AppBar, Toolbar, Typography, Button, Container, Stack, Grid, IconButton, Divider, Link as MuiLink, Menu, MenuItem } from '@mui/material';
+import { FacebookOutlined, TwitterOutlined, InstagramOutlined, LinkedinOutlined, EnvironmentOutlined, PhoneOutlined, MailOutlined, DownOutlined } from '@ant-design/icons';
 
 export default function WebsiteLayout() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  // Login dropdown state
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openLogin = Boolean(anchorEl);
+  const handleLoginClick = (event) => setAnchorEl(event.currentTarget);
+  const handleLoginClose = () => setAnchorEl(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +20,15 @@ export default function WebsiteLayout() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const navItems = [
+    { label: 'Home', path: '/' },
+    { label: 'About Us', path: '/about' },
+    { label: 'Products', path: '/products' },
+    { label: 'Become Dealer', path: '/become-dealer' },
+    { label: 'Join Us', path: '/join-us' },
+    { label: 'Contact Us', path: '/contact' }
+  ];
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#fdfdfd' }}>
@@ -35,28 +50,50 @@ export default function WebsiteLayout() {
               <Typography variant="h4" fontWeight="800" sx={{ letterSpacing: '-0.5px' }}>CCS Partners</Typography>
             </Stack>
             
-            <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {['Home', 'About', 'Products', 'Gallery', 'Testimonials', 'Locator', 'Contact'].map((item) => (
+            <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+              {navItems.map((item) => (
                 <Button 
-                  key={item}
+                  key={item.label}
                   component={RouterLink} 
-                  to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                  to={item.path}
                   sx={{ 
-                    color: location.pathname === (item === 'Home' ? '/' : `/${item.toLowerCase()}`) ? 'primary.main' : 'text.primary',
+                    color: location.pathname === item.path ? 'primary.main' : 'text.primary',
                     fontWeight: 600,
                     textTransform: 'none',
                     fontSize: '1rem',
                     '&:hover': { color: 'primary.main', bgcolor: 'transparent' }
                   }}
                 >
-                  {item === 'Locator' ? 'Find Dealer' : item}
+                  {item.label}
                 </Button>
               ))}
-            </Stack>
-
-            <Stack direction="row" spacing={2} sx={{ display: { xs: 'none', md: 'flex' } }}>
-              <Button component={RouterLink} to="/login" variant="outlined" color="primary" sx={{ borderRadius: 2, px: 3, fontWeight: 'bold' }}>Login</Button>
-              <Button component={RouterLink} to="/register" variant="contained" color="primary" sx={{ borderRadius: 2, px: 3, fontWeight: 'bold', boxShadow: '0 4px 14px 0 rgba(46, 125, 50, 0.39)' }}>Become a Partner</Button>
+              
+              <Button
+                onClick={handleLoginClick}
+                endIcon={<DownOutlined style={{ fontSize: '10px' }} />}
+                sx={{ 
+                  color: 'text.primary',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  '&:hover': { color: 'primary.main', bgcolor: 'transparent' }
+                }}
+              >
+                Login
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                open={openLogin}
+                onClose={handleLoginClose}
+                PaperProps={{ elevation: 2, sx: { minWidth: 200, mt: 1, borderRadius: 2 } }}
+              >
+                <MenuItem component={RouterLink} to="/login" onClick={handleLoginClose} sx={{ py: 1.5 }}>
+                  Dealer Login
+                </MenuItem>
+                <MenuItem component={RouterLink} to="/login" onClick={handleLoginClose} sx={{ py: 1.5 }}>
+                  Distributor / Employee Login
+                </MenuItem>
+              </Menu>
             </Stack>
           </Toolbar>
         </Container>
@@ -89,9 +126,9 @@ export default function WebsiteLayout() {
             <Grid item xs={12} sm={6} md={2}>
               <Typography variant="h6" color="white" fontWeight="bold" mb={3}>Quick Links</Typography>
               <Stack spacing={2}>
-                {['Home', 'About Us', 'Products', 'Gallery', 'Testimonials'].map(item => (
-                  <MuiLink key={item} component={RouterLink} to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '')}`} sx={{ color: '#9ca3af', textDecoration: 'none', '&:hover': { color: 'primary.light' } }}>
-                    {item}
+                {navItems.map(item => (
+                  <MuiLink key={item.label} component={RouterLink} to={item.path} sx={{ color: '#9ca3af', textDecoration: 'none', '&:hover': { color: 'primary.light' } }}>
+                    {item.label}
                   </MuiLink>
                 ))}
               </Stack>
@@ -100,7 +137,6 @@ export default function WebsiteLayout() {
             <Grid item xs={12} sm={6} md={3}>
               <Typography variant="h6" color="white" fontWeight="bold" mb={3}>Resources</Typography>
               <Stack spacing={2}>
-                <MuiLink component={RouterLink} to="/locator" sx={{ color: '#9ca3af', textDecoration: 'none', '&:hover': { color: 'primary.light' } }}>Dealer Locator</MuiLink>
                 <MuiLink component={RouterLink} to="/contact" sx={{ color: '#9ca3af', textDecoration: 'none', '&:hover': { color: 'primary.light' } }}>Contact Support</MuiLink>
                 <MuiLink href="#" sx={{ color: '#9ca3af', textDecoration: 'none', '&:hover': { color: 'primary.light' } }}>Download Brochure</MuiLink>
                 <MuiLink href="#" sx={{ color: '#9ca3af', textDecoration: 'none', '&:hover': { color: 'primary.light' } }}>Privacy Policy</MuiLink>

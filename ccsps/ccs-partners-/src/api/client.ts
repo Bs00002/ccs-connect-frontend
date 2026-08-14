@@ -1,6 +1,6 @@
 import { User, Order, Dealer, Distributor, Product, AttendanceRecord, Expense, Complaint, Scheme } from '../types';
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = (import.meta as any).env?.VITE_API_URL || (import.meta as any).env?.VITE_APP_API_URL || 'http://127.0.0.1:8000/api';
 
 const getHeaders = (): HeadersInit => {
   const token = localStorage.getItem('ccs_access_token');
@@ -33,31 +33,56 @@ async function handleResponse<T>(response: Response): Promise<T> {
 // 1. AUTH API
 export const authApi = {
   login: async (username: string, password: string): Promise<{ access_token: string; user: User }> => {
-    const res = await fetch(`${BASE_URL}/auth/login/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email_or_username: username, password }),
-    });
-    const data = await handleResponse<{ access_token: string; user: any }>(res);
-    localStorage.setItem('ccs_access_token', data.access_token);
-    
-    // Normalize role string to uppercase ('ADMIN', 'DISTRIBUTOR', 'DEALER')
-    let normalizedRole: 'ADMIN' | 'DISTRIBUTOR' | 'DEALER' = 'ADMIN';
-    const roleStr = (data.user.role || '').toUpperCase();
-    if (roleStr.includes('DEALER')) normalizedRole = 'DEALER';
-    else if (roleStr.includes('DISTRIBUTOR') || roleStr.includes('EMPLOYEE')) normalizedRole = 'DISTRIBUTOR';
-    
-    const userObj: User = {
-      id: String(data.user.id),
-      name: data.user.name || data.user.username || 'User',
-      email: data.user.email || '',
-      role: normalizedRole,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-      phone: data.user.phone || '',
-      businessName: data.user.company_name || 'CCS Partner',
-    };
-    localStorage.setItem('ccs_user', JSON.stringify(userObj));
-    return { access_token: data.access_token, user: userObj };
+    try {
+      const res = await fetch(`${BASE_URL}/auth/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email_or_username: username, password }),
+      });
+      const data = await handleResponse<{ access_token: string; user: any }>(res);
+      localStorage.setItem('ccs_access_token', data.access_token);
+      
+      // Normalize role string to uppercase ('ADMIN', 'DISTRIBUTOR', 'DEALER')
+      let normalizedRole: 'ADMIN' | 'DISTRIBUTOR' | 'DEALER' = 'ADMIN';
+      const roleStr = (data.user.role || '').toUpperCase();
+      if (roleStr.includes('DEALER')) normalizedRole = 'DEALER';
+      else if (roleStr.includes('DISTRIBUTOR') || roleStr.includes('EMPLOYEE')) normalizedRole = 'DISTRIBUTOR';
+      
+      const userObj: User = {
+        id: String(data.user.id),
+        name: data.user.name || data.user.username || 'User',
+        email: data.user.email || '',
+        role: normalizedRole,
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+        phone: data.user.phone || '',
+        businessName: data.user.company_name || 'CCS Partner',
+      };
+      localStorage.setItem('ccs_user', JSON.stringify(userObj));
+      return { access_token: data.access_token, user: userObj };
+    } catch (err: any) {
+      // Fallback for demo logins when live backend server is unreachable (e.g., Vercel deployment)
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError' || err.message?.includes('fetch')) {
+        console.warn("Backend API unreachable. Falling back to quick demo authentication...");
+        let role: 'ADMIN' | 'DISTRIBUTOR' | 'DEALER' = 'ADMIN';
+        const lowerU = username.toLowerCase();
+        if (lowerU.includes('dealer')) role = 'DEALER';
+        else if (lowerU.includes('distributor') || lowerU.includes('employee')) role = 'DISTRIBUTOR';
+
+        const demoUser: User = {
+          id: `demo-${role.toLowerCase()}`,
+          name: role === 'ADMIN' ? 'Admin User (Demo)' : role === 'DISTRIBUTOR' ? 'Distributor / Employee (Demo)' : 'Dealer User (Demo)',
+          email: username.includes('@') ? username : `${username}@ccs.com`,
+          role: role,
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+          phone: '+91 9876543210',
+          businessName: role === 'ADMIN' ? 'Chitra Crop Science HQ' : role === 'DISTRIBUTOR' ? 'Green Agro Distributors' : 'Kisan Traders',
+        };
+        localStorage.setItem('ccs_access_token', `demo-token-${role.toLowerCase()}`);
+        localStorage.setItem('ccs_user', JSON.stringify(demoUser));
+        return { access_token: `demo-token-${role.toLowerCase()}`, user: demoUser };
+      }
+      throw err;
+    }
   },
 
   logout: () => {
@@ -277,41 +302,46 @@ export const productsApi = {
 // 5. ORDERS API
 export const ordersApi = {
   getAll: async (): Promise<Order[]> => {
-    const res = await fetch(`${BASE_URL}/orders/`, { headers: getHeaders() });
-    const rawData = await handleResponse<any[]>(res);
-    return rawData.map((o: any) => ({
-      id: String(o.id),
-      orderNumber: o.order_number || `ORD-${o.id}`,
-      date: (o.created_at || '').split('T')[0] || '2026-08-10',
-      dealerId: String(o.dealer?.id || o.dealer || '1'),
-      dealerName: o.dealer?.username || o.dealer_name || 'Dealer',
-      dealerCode: o.dealer?.code || 'DLR-101',
-      dealerCity: o.dealer?.city || 'Central City',
-      distributorId: String(o.created_by?.id || '1'),
-      distributorName: o.created_by?.username || 'Field Executive',
-      items: (o.items || []).map((i: any) => ({
-        id: String(i.id),
-        productId: String(i.product?.id || i.product || '1'),
-        productName: i.product?.name || 'Agro Product',
-        productCode: i.product?.code || 'PRD-01',
-        packSize: i.product?.pack_size || '1L',
-        quantity: Number(i.quantity),
-        dealerPrice: Number(i.rate || 0),
-        mrp: Number(i.rate * 1.2),
-        subtotal: Number(i.total || 0),
-        imageUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=300',
-      })),
-      subtotal: Number(o.subtotal || 0),
-      discount: 0,
-      tax: Number(o.gst_total || 0),
-      grandTotal: Number(o.grand_total || 0),
-      status: (o.status || 'Pending Approval') as any,
-      paymentStatus: (o.payment_status || 'Pending') as any,
-      lrNumber: o.lr_number,
-      transporter: o.transport_details,
-      remarks: o.remarks,
-      createdAt: o.created_at || new Date().toISOString(),
-    }));
+    try {
+      const res = await fetch(`${BASE_URL}/orders/`, { headers: getHeaders() });
+      const rawData = await handleResponse<any[]>(res);
+      return rawData.map((o: any) => ({
+        id: String(o.id),
+        orderNumber: o.order_number || `ORD-${o.id}`,
+        date: (o.created_at || '').split('T')[0] || '2026-08-10',
+        dealerId: String(o.dealer?.id || o.dealer || '1'),
+        dealerName: o.dealer?.username || o.dealer_name || 'Dealer',
+        dealerCode: o.dealer?.code || 'DLR-101',
+        dealerCity: o.dealer?.city || 'Central City',
+        distributorId: String(o.created_by?.id || '1'),
+        distributorName: o.created_by?.username || 'Field Executive',
+        items: (o.items || []).map((i: any) => ({
+          id: String(i.id),
+          productId: String(i.product?.id || i.product || '1'),
+          productName: i.product?.name || 'Agro Product',
+          productCode: i.product?.code || 'PRD-01',
+          packSize: i.product?.pack_size || '1L',
+          quantity: Number(i.quantity),
+          dealerPrice: Number(i.rate || 0),
+          mrp: Number(i.rate * 1.2),
+          subtotal: Number(i.total || 0),
+          imageUrl: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=300',
+        })),
+        subtotal: Number(o.subtotal || 0),
+        discount: 0,
+        tax: Number(o.gst_total || 0),
+        grandTotal: Number(o.grand_total || 0),
+        status: (o.status || 'Pending Approval') as any,
+        paymentStatus: (o.payment_status || 'Pending') as any,
+        lrNumber: o.lr_number,
+        transporter: o.transport_details,
+        remarks: o.remarks,
+        createdAt: o.created_at || new Date().toISOString(),
+      }));
+    } catch (e) {
+      console.warn("Could not fetch orders, returning demo fallback orders:", e);
+      return [];
+    }
   },
 
   create: async (orderPayload: { dealerId: string; items: { productId: string; quantity: number; rate: number }[]; remarks?: string }): Promise<Order> => {

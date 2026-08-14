@@ -73,7 +73,7 @@ export default function Home() {
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <Button component={Link} to="/products" variant="contained" color="primary" size="large" sx={{ px: 4, py: 1.5, fontSize: '1.1rem', borderRadius: 8 }} endIcon={<ArrowRightOutlined />}>Explore Products</Button>
-                <Button component={Link} to="/register" variant="outlined" size="large" sx={{ px: 4, py: 1.5, fontSize: '1.1rem', color: 'white', borderColor: 'white', borderRadius: 8, '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(46,125,50,0.1)' } }}>Become a Dealer</Button>
+                <Button component={Link} to="/become-dealer" variant="outlined" size="large" sx={{ px: 4, py: 1.5, fontSize: '1.1rem', color: 'white', borderColor: 'white', borderRadius: 8, '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(46,125,50,0.1)' } }}>Become a Dealer</Button>
               </Stack>
             </Grid>
           </Grid>
@@ -168,7 +168,7 @@ export default function Home() {
           <Typography variant="h6" color="#9ca3af" sx={{ mb: 5, fontWeight: 400 }}>
             Join our growing network of dealers who trust Chitra Crop Science for reliable supply, incredible margins, and dedicated support.
           </Typography>
-          <Button component={Link} to="/register" variant="contained" color="primary" size="large" sx={{ px: 6, py: 2, fontSize: '1.2rem', borderRadius: 8 }}>
+          <Button component={Link} to="/become-dealer" variant="contained" color="primary" size="large" sx={{ px: 6, py: 2, fontSize: '1.2rem', borderRadius: 8 }}>
             Partner With Us Today
           </Button>
         </Container>

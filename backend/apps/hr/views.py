@@ -27,7 +27,7 @@ class DailyTourPlanViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        if user.role in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.SALES_MANAGER]:
+        if user.role in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
             return DailyTourPlan.objects.all().order_by('-date', '-created_at')
         return DailyTourPlan.objects.filter(employee=user).order_by('-date', '-created_at')
         

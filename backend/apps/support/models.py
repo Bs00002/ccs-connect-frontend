@@ -19,7 +19,6 @@ class ComplaintStatus(models.TextChoices):
 class Complaint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     dealer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints', null=True, blank=True)
-    farmer = models.ForeignKey('farmers.FarmerProfile', on_delete=models.CASCADE, related_name='complaints', null=True, blank=True)
     
     category = models.CharField(max_length=50, choices=ComplaintCategory.choices)
     description = models.TextField()

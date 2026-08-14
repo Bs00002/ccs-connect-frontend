@@ -6,9 +6,7 @@ import {
   FileTextOutlined,
   WalletOutlined,
   UserOutlined,
-  CustomerServiceOutlined,
-  BellOutlined,
-  LogoutOutlined
+  CustomerServiceOutlined
 } from '@ant-design/icons';
 
 const icons = {
@@ -18,9 +16,7 @@ const icons = {
   FileTextOutlined,
   WalletOutlined,
   UserOutlined,
-  CustomerServiceOutlined,
-  BellOutlined,
-  LogoutOutlined
+  CustomerServiceOutlined
 };
 
 const dealerMenu = {
@@ -46,7 +42,7 @@ const dealerMenu = {
         },
         {
           id: 'orders',
-          title: 'Orders',
+          title: 'My Orders',
           type: 'item',
           url: '/dealer/orders',
           icon: icons.ShoppingCartOutlined
@@ -66,13 +62,6 @@ const dealerMenu = {
           icon: icons.FileTextOutlined
         },
         {
-          id: 'profile',
-          title: 'Profile',
-          type: 'item',
-          url: '/dealer/profile',
-          icon: icons.UserOutlined
-        },
-        {
           id: 'support',
           title: 'Support',
           type: 'item',
@@ -80,18 +69,11 @@ const dealerMenu = {
           icon: icons.CustomerServiceOutlined
         },
         {
-          id: 'notifications',
-          title: 'Notifications',
+          id: 'profile',
+          title: 'My Profile',
           type: 'item',
-          url: '/dealer/notifications',
-          icon: icons.BellOutlined
-        },
-        {
-          id: 'logout',
-          title: 'Logout',
-          type: 'item',
-          url: '/login',
-          icon: icons.LogoutOutlined
+          url: '/dealer/profile',
+          icon: icons.UserOutlined
         }
       ]
     }

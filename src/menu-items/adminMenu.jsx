@@ -5,13 +5,16 @@ import {
   TeamOutlined,
   UsergroupAddOutlined,
   ShoppingCartOutlined,
-  CarOutlined,
   FileTextOutlined,
-  MoneyCollectOutlined,
   WalletOutlined,
   BarChartOutlined,
   SettingOutlined,
-  ExperimentOutlined
+  FundOutlined,
+  CalendarOutlined,
+  EnvironmentOutlined,
+  BellOutlined,
+  LinkOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 
 const icons = {
@@ -20,20 +23,23 @@ const icons = {
   TeamOutlined,
   UsergroupAddOutlined,
   ShoppingCartOutlined,
-  CarOutlined,
   FileTextOutlined,
-  MoneyCollectOutlined,
   WalletOutlined,
   BarChartOutlined,
   SettingOutlined,
-  ExperimentOutlined
+  FundOutlined,
+  CalendarOutlined,
+  EnvironmentOutlined,
+  BellOutlined,
+  LinkOutlined,
+  UserOutlined
 };
 
 const adminMenu = {
   items: [
     {
       id: 'group-admin',
-      title: 'Admin Operating Panel',
+      title: 'Admin Operations',
       type: 'group',
       children: [
         {
@@ -42,13 +48,6 @@ const adminMenu = {
           type: 'item',
           url: '/admin/dashboard',
           icon: icons.DashboardOutlined
-        },
-        {
-          id: 'products',
-          title: 'Products',
-          type: 'item',
-          url: '/admin/products',
-          icon: icons.AppstoreOutlined
         },
         {
           id: 'dealers',
@@ -65,18 +64,25 @@ const adminMenu = {
           icon: icons.UsergroupAddOutlined
         },
         {
+          id: 'assignments',
+          title: 'Assignments',
+          type: 'item',
+          url: '/admin/assignments',
+          icon: icons.LinkOutlined
+        },
+        {
+          id: 'products',
+          title: 'Products',
+          type: 'item',
+          url: '/admin/products',
+          icon: icons.AppstoreOutlined
+        },
+        {
           id: 'orders',
           title: 'Orders',
           type: 'item',
           url: '/admin/orders',
           icon: icons.ShoppingCartOutlined
-        },
-        {
-          id: 'dispatch',
-          title: 'Dispatch',
-          type: 'item',
-          url: '/admin/dispatch',
-          icon: icons.CarOutlined
         },
         {
           id: 'invoices',
@@ -86,18 +92,39 @@ const adminMenu = {
           icon: icons.FileTextOutlined
         },
         {
-          id: 'collections',
-          title: 'Collections',
-          type: 'item',
-          url: '/admin/collections',
-          icon: icons.MoneyCollectOutlined
-        },
-        {
           id: 'payments',
           title: 'Payments',
           type: 'item',
           url: '/admin/payments',
           icon: icons.WalletOutlined
+        },
+        {
+          id: 'expenses',
+          title: 'Expenses',
+          type: 'item',
+          url: '/admin/expenses',
+          icon: icons.FundOutlined
+        },
+        {
+          id: 'attendance',
+          title: 'Attendance',
+          type: 'item',
+          url: '/admin/attendance',
+          icon: icons.CalendarOutlined
+        },
+        {
+          id: 'tracking',
+          title: 'Live Tracking',
+          type: 'item',
+          url: '/admin/tracking',
+          icon: icons.EnvironmentOutlined
+        },
+        {
+          id: 'notifications',
+          title: 'Notifications',
+          type: 'item',
+          url: '/admin/notifications',
+          icon: icons.BellOutlined
         },
         {
           id: 'reports',
@@ -107,18 +134,18 @@ const adminMenu = {
           icon: icons.BarChartOutlined
         },
         {
-          id: 'farmers',
-          title: 'Farmers CRM',
-          type: 'item',
-          url: '/admin/farmers',
-          icon: icons.TeamOutlined
-        },
-        {
           id: 'settings',
           title: 'Settings',
           type: 'item',
           url: '/admin/settings',
           icon: icons.SettingOutlined
+        },
+        {
+          id: 'profile',
+          title: 'Profile',
+          type: 'item',
+          url: '/admin/profile',
+          icon: icons.UserOutlined
         }
       ]
     }

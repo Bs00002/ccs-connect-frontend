@@ -22,12 +22,6 @@ import Avatar from 'components/@extended/Avatar';
 import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
 import IconButton from 'components/@extended/IconButton';
-import useAuth from 'hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 
 // assets
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
@@ -55,9 +49,6 @@ function a11yProps(index) {
 
 export default function Profile() {
   const theme = useTheme();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const isDealer = user?.role === 'Dealer';
 
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -76,15 +67,6 @@ export default function Profile() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   return (
@@ -133,79 +115,62 @@ export default function Profile() {
                       <Stack direction="row" sx={{ gap: 1.25, alignItems: 'center' }}>
                         <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                         <Stack>
-                          <Typography variant="h6">{user?.name || 'Dealer User'}</Typography>
+                          <Typography variant="h6">John Doe</Typography>
                           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {user?.role || 'Dealer'}
+                            UI/UX Designer
                           </Typography>
                         </Stack>
                       </Stack>
                       <Tooltip title="Logout">
-                        <IconButton size="large" sx={{ color: 'text.primary' }} onClick={handleLogout}>
+                        <IconButton size="large" sx={{ color: 'text.primary' }}>
                           <LogoutOutlined />
                         </IconButton>
                       </Tooltip>
                     </Stack>
                   </CardContent>
 
-                  {isDealer ? (
-                    <Box sx={{ pb: 2 }}>
-                      <List component="nav" sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
-                        <ListItemButton onClick={() => { navigate('/app/profile'); handleClose({}); }}>
-                          <ListItemIcon><UserOutlined /></ListItemIcon>
-                          <ListItemText primary="Profile" />
-                        </ListItemButton>
-                        <ListItemButton onClick={handleLogout}>
-                          <ListItemIcon><LogoutOutlined /></ListItemIcon>
-                          <ListItemText primary="Logout" />
-                        </ListItemButton>
-                      </List>
-                    </Box>
-                  ) : (
-                    <>
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs variant="fullWidth" value={value} onChange={handleChange} aria-label="profile tabs">
-                          <Tab
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'row',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              textTransform: 'capitalize',
-                              gap: 1.25,
-                              '& .MuiTab-icon': {
-                                marginBottom: 0
-                              }
-                            }}
-                            icon={<UserOutlined />}
-                            label="Profile"
-                            {...a11yProps(0)}
-                          />
-                          <Tab
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'row',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              textTransform: 'capitalize',
-                              gap: 1.25,
-                              '& .MuiTab-icon': {
-                                marginBottom: 0
-                              }
-                            }}
-                            icon={<SettingOutlined />}
-                            label="Setting"
-                            {...a11yProps(1)}
-                          />
-                        </Tabs>
-                      </Box>
-                      <TabPanel value={value} index={0} dir={theme.direction}>
-                        <ProfileTab />
-                      </TabPanel>
-                      <TabPanel value={value} index={1} dir={theme.direction}>
-                        <SettingTab />
-                      </TabPanel>
-                    </>
-                  )}
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs variant="fullWidth" value={value} onChange={handleChange} aria-label="profile tabs">
+                      <Tab
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          textTransform: 'capitalize',
+                          gap: 1.25,
+                          '& .MuiTab-icon': {
+                            marginBottom: 0
+                          }
+                        }}
+                        icon={<UserOutlined />}
+                        label="Profile"
+                        {...a11yProps(0)}
+                      />
+                      <Tab
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          textTransform: 'capitalize',
+                          gap: 1.25,
+                          '& .MuiTab-icon': {
+                            marginBottom: 0
+                          }
+                        }}
+                        icon={<SettingOutlined />}
+                        label="Setting"
+                        {...a11yProps(1)}
+                      />
+                    </Tabs>
+                  </Box>
+                  <TabPanel value={value} index={0} dir={theme.direction}>
+                    <ProfileTab />
+                  </TabPanel>
+                  <TabPanel value={value} index={1} dir={theme.direction}>
+                    <SettingTab />
+                  </TabPanel>
                 </MainCard>
               </ClickAwayListener>
             </Paper>

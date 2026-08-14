@@ -31,15 +31,9 @@ INSTALLED_APPS = [
   'apps.orders',
   'apps.hr',
   'apps.products',
-  'apps.wallet',
   'apps.reports',
   'apps.notifications',
-  'apps.inventory',
   'apps.support',
-  'apps.promotions',
-  'apps.greenhouse',
-  'apps.farmers',
-  'apps.crm',
 ]
 
 MIDDLEWARE = [
@@ -130,8 +124,9 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [o for o in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',') if o]
-CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',') if o]
+CORS_ALLOWED_ORIGINS = [o for o in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173').split(',') if o]
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^http://localhost:(3000|5173)$", r"^http://127\.0\.0\.1:(3000|5173)$"]
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173').split(',') if o]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = not DEBUG

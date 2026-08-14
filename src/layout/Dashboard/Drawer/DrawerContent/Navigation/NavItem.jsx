@@ -64,47 +64,52 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
           target={itemTarget}
           disabled={item.disabled}
           selected={isSelected}
-          sx={({ palette: _palette, spacing: _spacing }) => ({
+          sx={(theme) => ({
             zIndex: 1201,
-            pl: drawerOpen ? `${level * 28}px` : 1.5,
+            pl: drawerOpen ? `${level * 20}px` : 1.5,
             py: !drawerOpen && level === 1 ? 1.25 : 1,
-            color: '#94a3b8', // slate-400 default text
+            my: 0.5,
+            mx: 1,
+            borderRadius: '10px',
+            transition: 'all 0.2s ease-in-out',
             ...(drawerOpen && {
-              '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }, // hover emerald
+              '&:hover': { bgcolor: '#E8F5E9', color: '#1B5E20' },
               '&.Mui-selected': {
-                bgcolor: 'rgba(16, 185, 129, 0.15)', // active emerald tint
-                borderRight: '3px solid',
-                borderColor: '#10B981', // emerald-500
-                color: '#10B981',
-                '&:hover': { color: '#10B981', bgcolor: 'rgba(16, 185, 129, 0.2)' }
+                bgcolor: '#2E7D32',
+                color: '#ffffff',
+                boxShadow: '0 4px 8px rgba(46, 125, 50, 0.25)',
+                '&:hover': { color: '#ffffff', bgcolor: '#1B5E20' },
+                '& .MuiListItemIcon-root': { color: '#ffffff' },
+                '& .MuiTypography-root': { color: '#ffffff', fontWeight: 700 }
               }
             }),
             ...(!drawerOpen && {
-              '&:hover': { bgcolor: 'transparent', color: '#10B981' },
-              '&.Mui-selected': { '&:hover': { bgcolor: 'transparent' }, bgcolor: 'transparent', color: '#10B981' }
+              '&:hover': { bgcolor: '#E8F5E9' },
+              '&.Mui-selected': { bgcolor: '#2E7D32', color: '#ffffff', '& .MuiListItemIcon-root': { color: '#ffffff' } }
             })
           })}
           onClick={() => itemHandler()}
         >
           {itemIcon && (
             <ListItemIcon
-              sx={{
-                minWidth: 28,
-                color: isSelected ? '#10B981' : '#94a3b8',
+              sx={(theme) => ({
+                minWidth: 32,
+                color: isSelected ? '#2E7D32' : '#525252',
                 ...(!drawerOpen && {
                   borderRadius: 1.5,
                   width: 36,
                   height: 36,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' }
+                  '&:hover': { bgcolor: '#E8F5E9' }
                 }),
                 ...(!drawerOpen &&
                   isSelected && {
-                    bgcolor: 'rgba(16, 185, 129, 0.15)',
-                    '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.2)' }
+                    bgcolor: '#2E7D32',
+                    color: '#ffffff',
+                    '&:hover': { bgcolor: '#1B5E20' }
                   })
-              }}
+              })}
             >
               {itemIcon}
             </ListItemIcon>
@@ -112,7 +117,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
           {(drawerOpen || (!drawerOpen && level !== 1)) && (
             <ListItemText
               primary={
-                <Typography variant="h6" sx={{ color: isSelected ? '#10B981' : 'inherit', fontWeight: isSelected ? 600 : 500 }}>
+                <Typography variant="h6" sx={{ color: isSelected ? '#ffffff' : '#334155', fontWeight: isSelected ? 700 : 600, fontSize: '0.8125rem' }}>
                   {item.title}
                 </Typography>
               }

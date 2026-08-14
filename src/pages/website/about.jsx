@@ -101,27 +101,7 @@ export default function About() {
         </Grid>
       </Container>
 
-      {/* Leadership */}
-      <Box sx={{ bgcolor: 'white', py: 10, mt: 10 }}>
-        <Container maxWidth="md">
-          <Typography variant="h3" fontWeight="bold" textAlign="center" gutterBottom>Leadership</Typography>
-          <Typography variant="h6" color="textSecondary" textAlign="center" sx={{ mb: 8, fontWeight: 400 }}>
-            Guided by decades of industry expertise and a passion for Indian agriculture.
-          </Typography>
-          <Grid container spacing={4} justifyContent="center">
-            <Grid item xs={12} sm={6} textAlign="center">
-              <Avatar src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=80" sx={{ width: 120, height: 120, mx: 'auto', mb: 3 }} />
-              <Typography variant="h5" fontWeight="bold">Jethu Dan (J Dan)</Typography>
-              <Typography variant="subtitle1" color="primary.main" fontWeight="bold">Founder & Managing Director</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6} textAlign="center">
-              <Avatar src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80" sx={{ width: 120, height: 120, mx: 'auto', mb: 3 }} />
-              <Typography variant="h5" fontWeight="bold">K Sharma</Typography>
-              <Typography variant="subtitle1" color="primary.main" fontWeight="bold">Chief Executive Officer</Typography>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+
 
       {/* Quality Control */}
       <Box sx={{ bgcolor: '#f8fafc', py: 10 }}>

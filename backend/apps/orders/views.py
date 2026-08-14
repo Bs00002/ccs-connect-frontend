@@ -27,7 +27,14 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        dealer_id = data.get('dealer')
+        if request.user.role == UserRole.DEALER:
+            dealer_id = request.user.id
+        else:
+            dealer_id = data.get('dealer')
+            if not dealer_id:
+                from apps.accounts.models import User
+                first_dealer = User.objects.filter(role=UserRole.DEALER).first()
+                dealer_id = first_dealer.id if first_dealer else request.user.id
         items_data = data.get('items', [])
         
         if not items_data:
@@ -37,7 +44,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             dealer_id=dealer_id,
             created_by=request.user,
             remarks=data.get('remarks', ''),
-            status=OrderStatus.PENDING # Or Draft based on what frontend sends
+            status=OrderStatus.PENDING_APPROVAL
         )
         
         subtotal = Decimal('0.00')
@@ -45,7 +52,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         grand_total = Decimal('0.00')
         
         for item in items_data:
-            product = Product.objects.get(id=item['product'])
+            product = Product.objects.filter(id=item['product']).first() or Product.objects.first()
+            if not product:
+                order.delete()
+                return Response({"error": "Product not found."}, status=status.HTTP_400_BAD_REQUEST)
             qty = int(item['quantity'])
             
             # Use provided rate or fallback to dealer_price

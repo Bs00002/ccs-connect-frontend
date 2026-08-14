@@ -1,79 +1,194 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Box, Stack } from '@mui/material';
-import EnterpriseTable from 'components/ui/EnterpriseTable';
-import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
-import { formatINR } from 'data/ccsMock';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Box, Typography, Stack, List, ListItemButton, ListItemText, Divider, TextField, InputAdornment, Button, Chip, Grid, Paper } from '@mui/material';
+import MasterDetailLayout from 'components/ui/MasterDetailLayout';
+import { SearchOutlined, FileTextOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import api from 'api/client';
-import { FileTextOutlined, CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { formatINR } from 'data/ccsMock';
+import MainCard from 'components/MainCard';
+
+const mockDealerInvoices = [
+  { id: '1', invoiceNumber: 'INV-2026-001', totalAmount: 16250, pendingAmount: 0, status: 'Paid', date: '2026-08-06', lrNumber: 'LR-9840192', biltyNo: 'BL-84920' },
+  { id: '2', invoiceNumber: 'INV-2026-002', totalAmount: 3200, pendingAmount: 3200, status: 'Unpaid', date: '2026-08-05', lrNumber: 'LR-9840188', biltyNo: 'BL-84915' },
+  { id: '3', invoiceNumber: 'INV-2026-003', totalAmount: 14250, pendingAmount: 5000, status: 'Partial', date: '2026-08-03', lrNumber: 'LR-9840170', biltyNo: 'BL-84900' }
+];
 
 export default function DealerInvoices() {
-  const [invoices, setInvoices] = useState([]);
+  const [data, setData] = useState(mockDealerInvoices);
   const [loading, setLoading] = useState(true);
-
-  const fetchInvoices = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get('/orders/invoices/');
-      const mapped = res.data.map(i => ({
-        id: i.id,
-        invoiceNumber: i.invoice_number,
-        total: parseFloat(i.total_amount),
-        paid: parseFloat(i.total_amount) - parseFloat(i.balance_due),
-        pending: parseFloat(i.balance_due),
-        status: i.status,
-        date: new Date(i.created_at).toLocaleDateString()
-      }));
-      setInvoices(mapped);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [selectedId, setSelectedId] = useState(mockDealerInvoices[0].id);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const res = await api.get('/orders/invoices/');
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const formatted = res.data.map(i => ({
+            id: String(i.id),
+            invoiceNumber: i.invoice_number || `INV-2026-${i.id}`,
+            totalAmount: parseFloat(i.total_amount || 0),
+            pendingAmount: parseFloat(i.balance_due || 0),
+            status: i.status || 'Unpaid',
+            date: new Date(i.created_at || Date.now()).toLocaleDateString(),
+            lrNumber: i.lr_number || `LR-9840${i.id}`,
+            biltyNo: i.bilty_no || `BL-8490${i.id}`
+          }));
+          setData(formatted);
+          if (formatted.length > 0) setSelectedId(formatted[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dealer invoices', err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchInvoices();
   }, []);
 
-  const columns = [
-    { field: 'invoiceNumber', headerName: 'Invoice No', flex: 1, minWidth: 120 },
-    { field: 'date', headerName: 'Date', flex: 1, minWidth: 120 },
-    { field: 'total', headerName: 'Amount', flex: 1, minWidth: 120, renderCell: (params) => formatINR(params.value) },
-    { field: 'paid', headerName: 'Paid', flex: 1, minWidth: 120, renderCell: (params) => formatINR(params.value || 0) },
-    { field: 'pending', headerName: 'Pending', flex: 1, minWidth: 120, renderCell: (params) => formatINR(params.value || 0) },
-    { field: 'status', headerName: 'Status', flex: 1, minWidth: 120 }
-  ];
+  const filteredInvoices = useMemo(() => {
+    return data.filter(i =>
+      i.invoiceNumber.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [data, search]);
 
-  const rowActions = [
-    { label: 'View Invoice', icon: <FileTextOutlined />, onClick: (row) => console.log('View', row), showInMenu: true },
-    { label: 'Download PDF', icon: <FileTextOutlined />, onClick: (row) => console.log('Download', row), showInMenu: true },
-    { label: 'Print', icon: <FileTextOutlined />, onClick: (row) => console.log('Print', row), showInMenu: true }
-  ];
+  const selectedInvoice = data.find(i => i.id === selectedId) || data[0];
+
+  const handleDownloadFile = (type, name) => {
+    alert(`Downloading ${type} document for ${name}...`);
+  };
+
+  const masterContent = (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Box sx={{ p: 2, bgcolor: '#F9FAFB', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>My Invoices</Typography>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search by invoice number..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchOutlined style={{ color: '#9CA3AF' }} />
+              </InputAdornment>
+            ),
+            sx: { bgcolor: '#fff', borderRadius: 1.5 }
+          }}
+        />
+      </Box>
+      <List sx={{ p: 0, flex: 1, overflowY: 'auto' }}>
+        {filteredInvoices.length === 0 ? (
+          <Box p={3} textAlign="center">
+            <Typography variant="body2" color="textSecondary">No invoices found.</Typography>
+          </Box>
+        ) : (
+          filteredInvoices.map((i) => (
+            <React.Fragment key={i.id}>
+              <ListItemButton
+                selected={selectedId === i.id}
+                onClick={() => setSelectedId(i.id)}
+                sx={{
+                  py: 2,
+                  px: 2,
+                  bgcolor: selectedId === i.id ? 'primary.lighter' : 'transparent',
+                  borderLeft: '4px solid',
+                  borderColor: selectedId === i.id ? 'primary.main' : 'transparent',
+                  '&:hover': { bgcolor: selectedId === i.id ? 'primary.lighter' : 'grey.100' }
+                }}
+              >
+                <ListItemText
+                  primary={<Typography variant="subtitle1" fontWeight={600}>{i.invoiceNumber}</Typography>}
+                  secondary={
+                    <Box mt={0.5}>
+                      <Stack direction="row" justifyContent="space-between" mt={1}>
+                        <Typography variant="body2" fontWeight={600} color="primary.main">{formatINR(i.totalAmount)}</Typography>
+                        <Typography variant="caption" color="textSecondary">{i.date}</Typography>
+                      </Stack>
+                    </Box>
+                  }
+                />
+              </ListItemButton>
+              <Divider />
+            </React.Fragment>
+          ))
+        )}
+      </List>
+    </Box>
+  );
+
+  const detailContent = selectedInvoice ? (
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={4}>
+        <Box>
+          <Typography variant="h4" fontWeight={700} gutterBottom>{selectedInvoice.invoiceNumber}</Typography>
+          <Typography variant="body1" color="textSecondary">Issued Date: {selectedInvoice.date}</Typography>
+        </Box>
+        <Chip
+          label={selectedInvoice.status}
+          color={selectedInvoice.status === 'Paid' ? 'success' : selectedInvoice.status === 'Partial' ? 'warning' : 'error'}
+          sx={{ px: 1, height: 32, fontSize: '0.875rem', fontWeight: 600 }}
+        />
+      </Stack>
+
+      {/* Download Action Buttons */}
+      <Stack direction="row" spacing={2} mb={4} flexWrap="wrap" gap={1}>
+        <Button variant="contained" startIcon={<DownloadOutlined />} onClick={() => handleDownloadFile('Invoice PDF', selectedInvoice.invoiceNumber)}>
+          Download Invoice PDF
+        </Button>
+        <Button variant="outlined" startIcon={<DownloadOutlined />} onClick={() => handleDownloadFile('Bill Receipt', selectedInvoice.invoiceNumber)}>
+          Download Bill
+        </Button>
+        <Button variant="outlined" color="secondary" startIcon={<DownloadOutlined />} onClick={() => handleDownloadFile('LR / Bilty', selectedInvoice.invoiceNumber)}>
+          Download LR / Bilty ({selectedInvoice.lrNumber})
+        </Button>
+      </Stack>
+
+      <MainCard title="Invoice & Payment Breakdown" sx={{ mb: 3 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={6} sm={3}>
+            <Typography variant="caption" color="textSecondary">Invoice Number</Typography>
+            <Typography variant="body1" fontWeight={600}>{selectedInvoice.invoiceNumber}</Typography>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Typography variant="caption" color="textSecondary">Issue Date</Typography>
+            <Typography variant="body1" fontWeight={600}>{selectedInvoice.date}</Typography>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Typography variant="caption" color="textSecondary">Total Bill Amount</Typography>
+            <Typography variant="h6" fontWeight={700}>{formatINR(selectedInvoice.totalAmount)}</Typography>
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <Typography variant="caption" color="textSecondary">Balance Due</Typography>
+            <Typography variant="h6" fontWeight={700} color="error.main">{formatINR(selectedInvoice.pendingAmount)}</Typography>
+          </Grid>
+        </Grid>
+      </MainCard>
+
+      <MainCard title="Transport & Logistics (LR Details)">
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Typography variant="caption" color="textSecondary">LR (Lorry Receipt) Number</Typography>
+            <Typography variant="body1" fontWeight={600}>{selectedInvoice.lrNumber}</Typography>
+          </Grid>
+          <Grid item xs={6}>
+            <Typography variant="caption" color="textSecondary">Bilty Number</Typography>
+            <Typography variant="body1" fontWeight={600}>{selectedInvoice.biltyNo}</Typography>
+          </Grid>
+        </Grid>
+      </MainCard>
+    </Box>
+  ) : (
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'text.secondary' }}>
+      <Typography>Select an invoice to view details</Typography>
+    </Box>
+  );
 
   return (
-    <Grid container rowSpacing={3} columnSpacing={2.75}>
-      <Grid item xs={12}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
-          <Box>
-            <Typography variant="h5">My Invoices</Typography>
-            <Typography variant="body2" color="textSecondary">View and download your invoices.</Typography>
-          </Box>
-        </Stack>
-      </Grid>
-      <Grid item xs={12} sm={4}>
-        <AnalyticEcommerce title="Total Invoices" count={invoices.length} icon={<FileTextOutlined />} color="primary" />
-      </Grid>
-      <Grid item xs={12} sm={4}>
-        <AnalyticEcommerce title="Paid Invoices" count={invoices.filter(i => i.status === 'Paid').length} icon={<CheckCircleOutlined />} color="success" />
-      </Grid>
-      <Grid item xs={12} sm={4}>
-        <AnalyticEcommerce title="Pending Invoices" count={invoices.filter(i => i.status === 'Unpaid' || i.status === 'Partial').length} icon={<WarningOutlined />} color="warning" />
-      </Grid>
-      <Grid item xs={12}>
-        <Box sx={{ height: 600 }}>
-          <EnterpriseTable rows={invoices} columns={columns} loading={loading} rowActions={rowActions} />
-        </Box>
-      </Grid>
-    </Grid>
+    <MasterDetailLayout
+      masterContent={masterContent}
+      detailContent={detailContent}
+      masterWidth={350}
+    />
   );
 }

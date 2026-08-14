@@ -1,54 +1,46 @@
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import LogoIcon from './LogoIcon';
 
-// ==============================|| CCS LOGO MAIN ||============================== //
+// ==============================|| CHITRA CROP SCIENCE LOGO MAIN ||============================== //
 
 export default function LogoMain() {
-  const theme = useTheme();
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-      <svg width="34" height="34" viewBox="0 0 129 129" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M64.5 0C57.3 0 50.4 2.1 44.4 5.9C38.5 9.8 33.6 15.2 30.2 21.5C26.9 27.8 25.1 34.8 25.1 42C25.1 47.1 26 52.1 27.7 56.8C29.4 61.4 31.9 65.7 35.1 69.4L64.5 103.5L93.9 69.4C97.1 65.7 99.6 61.4 101.3 56.8C103 52.1 103.9 47.1 103.9 42C103.9 34.8 102.1 27.8 98.8 21.5C95.4 15.2 90.5 9.8 84.6 5.9C78.6 2.1 71.7 0 64.5 0ZM64.5 12.9C68.9 12.9 73.2 14.2 76.9 16.6C80.6 19.1 83.5 22.5 85.3 26.5C87.1 30.5 87.7 34.9 87.2 39.2C86.7 43.5 85.1 47.6 82.6 50.9L64.5 72L46.4 50.9C43.9 47.6 42.3 43.5 41.8 39.2C41.3 34.9 41.9 30.5 43.7 26.5C45.5 22.5 48.4 19.1 52.1 16.6C55.8 14.2 60.1 12.9 64.5 12.9Z"
-          fill={theme.vars.palette.primary.main}
-        />
-        <path
-          d="M46.4 50.9C43.9 47.6 42.3 43.5 41.8 39.2C41.3 34.9 41.9 30.5 43.7 26.5C44.3 25.2 45.1 24 45.9 22.8C42.9 26 40.9 29.9 40.2 34.1C39.5 38.2 40.2 42.5 42.1 46.2C44 49.9 47 52.9 50.7 54.8L64.5 72L46.4 50.9Z"
-          fill={theme.vars.palette.primary.dark}
-          fillOpacity="0.5"
-        />
-        <circle cx="64.5" cy="42" r="11" fill={theme.vars.palette.primary.contrastText} />
-        <path
-          d="M59 42C59 39 61.5 36.5 64.5 36.5C66.2 36.5 67.7 37.2 68.9 38.4C69.4 37.8 69.7 37 69.7 36.2C69.7 33.3 67.3 31 64.5 31C61.7 31 59.3 33.3 59.3 36.2H58.8C58.8 33.6 60.9 31.5 63.5 31.5H64.5V30.5H63.5C60.4 30.5 58 32.9 58 36H59ZM64.5 52.5C67 50.6 69 48 70.2 44.9H69.2C68.2 47.5 66.5 49.6 64.5 50.9V52.5Z"
-          fill={theme.vars.palette.primary.main}
-        />
-      </svg>
-      <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <LogoIcon />
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1 }}>
         <Typography
-          variant="subtitle1"
+          variant="h6"
           sx={{
-            fontWeight: 800,
-            color: theme.vars.palette.primary.dark,
-            fontSize: '1.05rem',
-            letterSpacing: '0.2px'
+            fontWeight: 900,
+            fontSize: '1.2rem',
+            lineHeight: 1,
+            background: 'linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '1.5px',
+            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+            textTransform: 'uppercase'
           }}
         >
-          CCS Connect
+          CHITRA
         </Typography>
         <Typography
           variant="caption"
           sx={{
-            color: 'text.secondary',
-            fontSize: '0.62rem',
-            letterSpacing: '0.4px',
-            textTransform: 'uppercase'
+            fontWeight: 800,
+            color: '#1A237E',
+            fontSize: '0.68rem',
+            lineHeight: 1.2,
+            letterSpacing: '0.8px',
+            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif'
           }}
         >
-          Enterprise Partner ERP
+          Crop Science
         </Typography>
       </Box>
     </Box>
   );
 }
+

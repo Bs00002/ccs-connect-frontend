@@ -7,10 +7,8 @@ import { DRAWER_WIDTH } from 'config';
 
 const openedMixin = (theme) => ({
   width: DRAWER_WIDTH,
-  borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-  backgroundColor: '#0f172a',
-  color: '#e2e8f0',
-  backdropFilter: 'blur(10px)',
+  borderRight: '1px solid',
+  borderRightColor: theme.vars.palette.divider,
 
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
@@ -26,13 +24,10 @@ const closedMixin = (theme) => ({
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen
   }),
-  backgroundColor: '#0f172a',
-  color: '#e2e8f0',
-  backdropFilter: 'blur(10px)',
 
   overflowX: 'hidden',
   width: theme.spacing(7.5),
-  borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+  borderRight: 'none',
   boxShadow: theme.vars.customShadows.z1
 });
 

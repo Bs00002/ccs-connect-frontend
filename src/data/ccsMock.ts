@@ -90,8 +90,11 @@ function randomFloatBetween(min: number, max: number, decimals: number = 2): num
   return Number((Math.random() * (max - min) + min).toFixed(decimals));
 }
 
-function formatINR(n: number): string {
-  return '₹' + n.toLocaleString('en-IN');
+function formatINR(n?: number | null | string): string {
+  if (n === undefined || n === null || n === '' || isNaN(Number(n))) {
+    return '₹0';
+  }
+  return '₹' + Number(n).toLocaleString('en-IN');
 }
 
 function pad(n: number, width = 4): string {

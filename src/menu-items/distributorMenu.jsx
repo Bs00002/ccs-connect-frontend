@@ -2,34 +2,30 @@
 import {
   DashboardOutlined,
   CalendarOutlined,
-  EnvironmentOutlined,
-  TeamOutlined,
+  DollarOutlined,
   PlusCircleOutlined,
   ShoppingCartOutlined,
-  MoneyCollectOutlined,
-  DollarOutlined,
-  FileDoneOutlined,
-  UserOutlined
+  CustomerServiceOutlined,
+  UserOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 
 const icons = {
   DashboardOutlined,
   CalendarOutlined,
-  EnvironmentOutlined,
-  TeamOutlined,
+  DollarOutlined,
   PlusCircleOutlined,
   ShoppingCartOutlined,
-  MoneyCollectOutlined,
-  DollarOutlined,
-  FileDoneOutlined,
-  UserOutlined
+  CustomerServiceOutlined,
+  UserOutlined,
+  LogoutOutlined
 };
 
 const distributorMenu = {
   items: [
     {
       id: 'group-field',
-      title: 'Field Application',
+      title: 'Field Operations',
       type: 'group',
       children: [
         {
@@ -40,46 +36,11 @@ const distributorMenu = {
           icon: icons.DashboardOutlined
         },
         {
-          id: 'daily-working',
-          title: 'Daily Working',
+          id: 'attendance',
+          title: 'Attendance',
           type: 'item',
-          url: '/field/daily-working',
+          url: '/field/attendance',
           icon: icons.CalendarOutlined
-        },
-        {
-          id: 'dealer-visits',
-          title: 'Dealer Visits',
-          type: 'item',
-          url: '/field/visits',
-          icon: icons.EnvironmentOutlined
-        },
-        {
-          id: 'dealers',
-          title: 'Dealers',
-          type: 'item',
-          url: '/field/dealers',
-          icon: icons.TeamOutlined
-        },
-        {
-          id: 'create-order',
-          title: 'Create Order',
-          type: 'item',
-          url: '/field/orders/create',
-          icon: icons.PlusCircleOutlined
-        },
-        {
-          id: 'orders',
-          title: 'Orders',
-          type: 'item',
-          url: '/field/orders',
-          icon: icons.ShoppingCartOutlined
-        },
-        {
-          id: 'collections',
-          title: 'Collections',
-          type: 'item',
-          url: '/field/collections',
-          icon: icons.MoneyCollectOutlined
         },
         {
           id: 'expenses',
@@ -89,18 +50,39 @@ const distributorMenu = {
           icon: icons.DollarOutlined
         },
         {
-          id: 'daily-report',
-          title: 'Daily Report',
+          id: 'create-order',
+          title: 'Create Orders',
           type: 'item',
-          url: '/field/daily-report',
-          icon: icons.FileDoneOutlined
+          url: '/field/orders/create',
+          icon: icons.PlusCircleOutlined
+        },
+        {
+          id: 'my-orders',
+          title: 'My Created Orders',
+          type: 'item',
+          url: '/field/orders',
+          icon: icons.ShoppingCartOutlined
+        },
+        {
+          id: 'support',
+          title: 'Support',
+          type: 'item',
+          url: '/field/support',
+          icon: icons.CustomerServiceOutlined
         },
         {
           id: 'profile',
-          title: 'Profile',
+          title: 'My Profile',
           type: 'item',
           url: '/field/profile',
           icon: icons.UserOutlined
+        },
+        {
+          id: 'logout',
+          title: 'Logout',
+          type: 'item',
+          url: '/logout',
+          icon: icons.LogoutOutlined
         }
       ]
     }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_APP_API_URL || 'http://localhost:8000/api';
 
 const client = axios.create({
   baseURL: API_URL,
@@ -24,11 +24,17 @@ client.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const currentToken = localStorage.getItem('access_token');
+
+    // If using mock token for demo, bypass token refresh auto-logout
+    if (currentToken && currentToken.startsWith('mock-')) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        // Attempt to refresh the token. 
-        // The refresh token is in the HttpOnly cookie, so we just call the endpoint.
+        // Attempt to refresh the token.
         const res = await axios.post(
           `${API_URL}/auth/token/refresh/`,
           {},
@@ -39,10 +45,13 @@ client.interceptors.response.use(
         client.defaults.headers.common['Authorization'] = `Bearer ${access}`;
         return client(originalRequest);
       } catch (err) {
-        // Refresh failed, clear session
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        // Refresh failed, clear session only if not in demo/mock mode
+        const tokenCheck = localStorage.getItem('access_token');
+        if (!tokenCheck || !tokenCheck.startsWith('mock-')) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
         return Promise.reject(err);
       }
     }
@@ -51,3 +60,4 @@ client.interceptors.response.use(
 );
 
 export default client;
+

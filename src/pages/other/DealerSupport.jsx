@@ -1,89 +1,160 @@
-import React from 'react';
-import { Grid, Typography, Box, Stack, Card, CardContent, Button } from '@mui/material';
-import { PhoneOutlined, MessageOutlined, WhatsAppOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Grid, Typography, Box, Stack, Card, CardContent, Button, TextField, Paper, Alert } from '@mui/material';
+import { PhoneOutlined, MessageOutlined, WhatsAppOutlined, CustomerServiceOutlined, SendOutlined } from '@ant-design/icons';
+import MainCard from 'components/MainCard';
 
 export default function DealerSupport() {
-  const companyPhone = "+919876543210"; // Placeholder
+  const [ticketTitle, setTicketTitle] = useState('');
+  const [ticketDesc, setTicketDesc] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleCreateTicket = (e) => {
+    e.preventDefault();
+    if (!ticketTitle || !ticketDesc) {
+      alert('Please fill out the ticket title and details.');
+      return;
+    }
+    setSubmitted(true);
+    setTicketTitle('');
+    setTicketDesc('');
+  };
 
   return (
-    <Box>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>Dealer Support</Typography>
-        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-          We are here to help. Reach out to us through any of the channels below.
-        </Typography>
-      </Box>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ height: '100%', textAlign: 'center', p: 2 }}>
-            <CardContent>
-              <Avatar sx={{ bgcolor: 'success.light', color: 'success.main', width: 64, height: 64, mx: 'auto', mb: 2 }}>
-                <WhatsAppOutlined style={{ fontSize: '2rem' }} />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>WhatsApp</Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                Get quick responses to your queries via WhatsApp.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="success" 
-                fullWidth
-                onClick={() => window.open(`https://wa.me/${companyPhone}`, '_blank')}
-              >
-                Chat on WhatsApp
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ height: '100%', textAlign: 'center', p: 2 }}>
-            <CardContent>
-              <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main', width: 64, height: 64, mx: 'auto', mb: 2 }}>
-                <PhoneOutlined style={{ fontSize: '2rem' }} />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>Call Us</Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                Speak directly with our support representatives.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                fullWidth
-                onClick={() => window.location.href = `tel:${companyPhone}`}
-              >
-                Call Now
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ height: '100%', textAlign: 'center', p: 2 }}>
-            <CardContent>
-              <Avatar sx={{ bgcolor: 'info.light', color: 'info.main', width: 64, height: 64, mx: 'auto', mb: 2 }}>
-                <MessageOutlined style={{ fontSize: '2rem' }} />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>Send Message</Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                Send us a message and we'll get back to you shortly.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="info" 
-                fullWidth
-                onClick={() => window.location.href = `mailto:support@example.com`}
-              >
-                Send Email
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
+    <Grid container rowSpacing={3} columnSpacing={2.75}>
+      {/* Header */}
+      <Grid item xs={12}>
+        <Box>
+          <Typography variant="h5" fontWeight={700}>Dealer Support & Assistance</Typography>
+          <Typography variant="body2" color="textSecondary">
+            Need help with your account, order status, or product queries? Reach out directly via WhatsApp, Call, or Support Ticket.
+          </Typography>
+        </Box>
       </Grid>
-    </Box>
+
+      {/* Direct Quick Action Cards */}
+      <Grid item xs={12} md={4}>
+        <Card sx={{ height: '100%', bgcolor: 'success.lighter', border: '1px solid', borderColor: 'success.light' }}>
+          <CardContent>
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <Box sx={{ p: 2, bgcolor: 'success.main', color: 'white', borderRadius: '50%' }}>
+                <WhatsAppOutlined style={{ fontSize: 32 }} />
+              </Box>
+              <Typography variant="h5" fontWeight={700} color="success.dark">WhatsApp Support</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Instant help from our Chitra Crop Science dealer helpdesk.
+              </Typography>
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<WhatsAppOutlined />}
+                fullWidth
+                href="https://wa.me/919876543210"
+                target="_blank"
+                sx={{ mt: 1, fontWeight: 700 }}
+              >
+                Chat on WhatsApp (+91 98765 43210)
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <Card sx={{ height: '100%', bgcolor: 'primary.lighter', border: '1px solid', borderColor: 'primary.light' }}>
+          <CardContent>
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white', borderRadius: '50%' }}>
+                <PhoneOutlined style={{ fontSize: 32 }} />
+              </Box>
+              <Typography variant="h5" fontWeight={700} color="primary.main">Toll-Free Helpline</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Speak directly with your assigned Sales Manager.
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<PhoneOutlined />}
+                fullWidth
+                href="tel:18001234567"
+                sx={{ mt: 1, fontWeight: 700 }}
+              >
+                Call 1800-123-4567
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} md={4}>
+        <Card sx={{ height: '100%', bgcolor: 'warning.lighter', border: '1px solid', borderColor: 'warning.light' }}>
+          <CardContent>
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <Box sx={{ p: 2, bgcolor: 'warning.main', color: 'white', borderRadius: '50%' }}>
+                <MessageOutlined style={{ fontSize: 32 }} />
+              </Box>
+              <Typography variant="h5" fontWeight={700} color="warning.dark">Email Depot Support</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Send official emails regarding ledger verification & billing.
+              </Typography>
+              <Button
+                variant="contained"
+                color="warning"
+                startIcon={<MessageOutlined />}
+                fullWidth
+                href="mailto:support@chitracropscience.com"
+                sx={{ mt: 1, fontWeight: 700 }}
+              >
+                Send Message
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      {/* Raise Support Ticket Form */}
+      <Grid item xs={12}>
+        <MainCard title="Raise a Support Ticket">
+          {submitted && (
+            <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSubmitted(false)}>
+              Your support ticket has been registered successfully! Ticket ID #TCK-2026-984. Our support representative will contact you shortly.
+            </Alert>
+          )}
+
+          <form onSubmit={handleCreateTicket}>
+            <Stack spacing={3}>
+              <TextField
+                fullWidth
+                label="Ticket Subject / Issue Title"
+                placeholder="e.g. Inquiry regarding order delivery status or billing credit"
+                value={ticketTitle}
+                onChange={(e) => setTicketTitle(e.target.value)}
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="Detailed Description"
+                multiline
+                rows={4}
+                placeholder="Explain your query or issue in detail..."
+                value={ticketDesc}
+                onChange={(e) => setTicketDesc(e.target.value)}
+                required
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                startIcon={<SendOutlined />}
+                sx={{ width: { xs: '100%', sm: 220 }, py: 1.2, fontWeight: 700 }}
+              >
+                Submit Support Ticket
+              </Button>
+            </Stack>
+          </form>
+        </MainCard>
+      </Grid>
+    </Grid>
   );
 }
-
-// Ensure Avatar is imported if not already, or we can use Box for the circle
-import { Avatar } from '@mui/material';

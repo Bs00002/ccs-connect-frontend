@@ -4,5 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import jsconfigPaths from 'vite-jsconfig-paths';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), jsconfigPaths()]
+  plugins: [react(), tailwindcss(), jsconfigPaths()],
+  server: {
+    port: 3000,
+    strictPort: true,
+    host: true,
+  },
 });
