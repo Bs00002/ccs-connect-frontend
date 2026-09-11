@@ -63,4 +63,4 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'ccs_id', 'email', 'username', 'phone', 'role', 'status', 'is_active', 'is_verified', 'joining_date', 'created_at', 'kyc_profile', 'dealer_profile', 'distributor_profile', 'employee_profile']
+        fields = ['id', 'ccs_id', 'email', 'username', 'phone', 'role', 'status', 'is_active', 'is_verified', 'joining_date', 'km_rate', 'created_at', 'kyc_profile', 'dealer_profile', 'distributor_profile', 'employee_profile']

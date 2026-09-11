@@ -14,6 +14,8 @@ class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     dealer_name = serializers.CharField(source='dealer.username', read_only=True)
     created_by_name = serializers.CharField(source='created_by.username', read_only=True)
+    bilty_uploaded_by_name = serializers.CharField(source='bilty_uploaded_by.username', read_only=True)
+    lr_generated_by_name = serializers.CharField(source='lr_generated_by.username', read_only=True)
     
     class Meta:
         model = Order

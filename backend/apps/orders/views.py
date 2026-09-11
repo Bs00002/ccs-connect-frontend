@@ -18,7 +18,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         qs = Order.objects.select_related('dealer', 'created_by').prefetch_related('items__product').order_by('-created_at')
-        if user.role in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+        if user.role in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.WAREHOUSE]:
             return qs
         elif user.role == UserRole.DEALER:
             return qs.filter(dealer=user)
@@ -43,6 +43,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = Order.objects.create(
             dealer_id=dealer_id,
             created_by=request.user,
+            payment_terms=data.get('payment_terms', data.get('paymentTerms', 'Cash (15 Days)')),
             remarks=data.get('remarks', ''),
             status=OrderStatus.PENDING_APPROVAL
         )
@@ -96,11 +97,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         if request.user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
-            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "Unauthorized. Only Admin can approve orders."}, status=status.HTTP_403_FORBIDDEN)
             
         order = self.get_object()
-        if order.status != OrderStatus.PENDING:
-            return Response({"error": "Can only approve Pending orders."}, status=status.HTTP_400_BAD_REQUEST)
+        if order.status not in [OrderStatus.PENDING_APPROVAL, OrderStatus.DRAFT, OrderStatus.SUBMITTED]:
+            return Response({"error": f"Can only approve orders in Pending Approval status. Current: {order.status}"}, status=status.HTTP_400_BAD_REQUEST)
             
         # Deduct inventory
         for item in order.items.all():
@@ -112,66 +113,108 @@ class OrderViewSet(viewsets.ModelViewSet):
             
         order.status = OrderStatus.APPROVED
         order.save()
-        return Response({"message": "Order approved and inventory deducted."})
+
+        from .models import OrderTimeline
+        OrderTimeline.objects.create(
+            order=order,
+            status=OrderStatus.APPROVED,
+            remarks="Order approved by Admin",
+            created_by=request.user
+        )
+
+        return Response({"message": "Order approved successfully and inventory updated.", "status": order.status})
 
     @action(detail=True, methods=['post'])
-    def cancel(self, request, pk=None):
+    def reject(self, request, pk=None):
+        if request.user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+            return Response({"error": "Unauthorized. Only Admin can reject orders."}, status=status.HTTP_403_FORBIDDEN)
+            
         order = self.get_object()
-        
-        # Only dealers can cancel before approval, Admins can cancel anytime
-        if request.user.role == UserRole.DEALER and order.status != OrderStatus.PENDING:
-            return Response({"error": "Can only cancel pending orders."}, status=status.HTTP_400_BAD_REQUEST)
+        if order.status != OrderStatus.PENDING_APPROVAL:
+            return Response({"error": f"Can only reject Pending Approval orders. Current: {order.status}"}, status=status.HTTP_400_BAD_REQUEST)
             
-        if order.status in [OrderStatus.DISPATCHED, OrderStatus.DELIVERED]:
-            return Response({"error": "Cannot cancel a dispatched or delivered order."}, status=status.HTTP_400_BAD_REQUEST)
-            
-        # If it was approved, refund inventory
-        if order.status == OrderStatus.APPROVED:
-            for item in order.items.all():
-                product = item.product
-                product.stock += item.quantity
-                product.save()
-                
-        order.status = OrderStatus.CANCELLED
+        order.status = OrderStatus.REJECTED
         order.save()
-        return Response({"message": "Order cancelled."})
+
+        from .models import OrderTimeline
+        OrderTimeline.objects.create(
+            order=order,
+            status=OrderStatus.REJECTED,
+            remarks=request.data.get('remarks', 'Order rejected by Admin'),
+            created_by=request.user
+        )
+
+        return Response({"message": "Order rejected by Admin.", "status": order.status})
 
     @action(detail=True, methods=['post'])
-    def update_status(self, request, pk=None):
-        if request.user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.WAREHOUSE]:
-            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+    def upload_bilty(self, request, pk=None):
+        if request.user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+            return Response({"error": "Unauthorized. Only Admin/Office can upload Bilty."}, status=status.HTTP_403_FORBIDDEN)
             
         order = self.get_object()
-        new_status = request.data.get('status')
-        remarks = request.data.get('remarks', '')
-        
-        if new_status in dict(OrderStatus.choices):
-            order.status = new_status
-            order.save()
+        if order.status not in [OrderStatus.APPROVED, OrderStatus.BILTY_UPLOADED]:
+            return Response({"error": "Bilty can only be uploaded for Approved orders."}, status=status.HTTP_400_BAD_REQUEST)
             
-            from .models import OrderTimeline
-            OrderTimeline.objects.create(
-                order=order,
-                status=new_status,
-                remarks=remarks,
-                created_by=request.user
-            )
-            
-            return Response({"message": f"Order status updated to {new_status}."})
-        return Response({"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)
+        from django.utils import timezone
+        order.bilty_number = request.data.get('bilty_number', order.bilty_number or f"BILTY-{order.order_number}")
+        if 'bilty_pdf' in request.FILES:
+            order.bilty_pdf = request.FILES['bilty_pdf']
+        order.bilty_date = timezone.now()
+        order.bilty_uploaded_by = request.user
+        order.status = OrderStatus.BILTY_UPLOADED
+        order.save()
+
+        from .models import OrderTimeline
+        OrderTimeline.objects.create(
+            order=order,
+            status=OrderStatus.BILTY_UPLOADED,
+            remarks=f"Office Bilty uploaded: {order.bilty_number}",
+            created_by=request.user
+        )
+
+        return Response({"message": "Bilty PDF and details uploaded successfully.", "status": order.status, "bilty_number": order.bilty_number})
 
     @action(detail=True, methods=['post'])
-    def dispatch_details(self, request, pk=None):
-        if request.user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.WAREHOUSE]:
-            return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
+    def mark_ready_dispatch(self, request, pk=None):
+        if request.user.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
+            return Response({"error": "Unauthorized. Only Admin/Office can set Ready to Dispatch."}, status=status.HTTP_403_FORBIDDEN)
             
         order = self.get_object()
-        order.transport_details = request.data.get('transport_details', order.transport_details)
-        order.lr_number = request.data.get('lr_number', order.lr_number)
+        if order.status != OrderStatus.BILTY_UPLOADED:
+            return Response({"error": "Order must have Bilty uploaded (status: Bilty Uploaded) before setting Ready to Dispatch."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        order.status = OrderStatus.READY_DISPATCH
+        order.save()
+
+        from .models import OrderTimeline
+        OrderTimeline.objects.create(
+            order=order,
+            status=OrderStatus.READY_DISPATCH,
+            remarks="Order marked Ready to Dispatch by Office",
+            created_by=request.user
+        )
+
+        return Response({"message": "Order is now Ready to Dispatch for Warehouse.", "status": order.status})
+
+    @action(detail=True, methods=['post'])
+    def generate_lr(self, request, pk=None):
+        order = self.get_object()
         
+        # LOCKED CHECK: LR Generation is locked before Ready to Dispatch stage!
+        if order.status != OrderStatus.READY_DISPATCH:
+            return Response({
+                "error": f"LR Generation is LOCKED! Order must be in 'Ready to Dispatch' status (Current: {order.status})."
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        from django.utils import timezone
+        order.lr_number = request.data.get('lr_number', order.lr_number or f"LR-{order.order_number}")
+        order.transport_details = request.data.get('transport_details', order.transport_details or 'Standard Logistics')
+        order.vehicle_number = request.data.get('vehicle_number', order.vehicle_number or '')
         if 'lr_receipt_upload' in request.FILES:
             order.lr_receipt_upload = request.FILES['lr_receipt_upload']
             
+        order.lr_date = timezone.now()
+        order.lr_generated_by = request.user
         order.status = OrderStatus.DISPATCHED
         order.save()
         
@@ -179,11 +222,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         OrderTimeline.objects.create(
             order=order,
             status=OrderStatus.DISPATCHED,
-            remarks=f"Dispatched via {order.transport_details}. LR: {order.lr_number}",
+            remarks=f"Warehouse LR Generated: {order.lr_number} via {order.transport_details}",
             created_by=request.user
         )
         
-        return Response({"message": "Dispatch details updated successfully."})
+        return Response({"message": "LR Generated successfully and order Dispatched.", "status": order.status, "lr_number": order.lr_number})
         
     @action(detail=True, methods=['get'])
     def timeline(self, request, pk=None):

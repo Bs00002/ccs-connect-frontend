@@ -9,16 +9,12 @@ class OrderStatus(models.TextChoices):
     SUBMITTED = 'Submitted', 'Submitted'
     PENDING_APPROVAL = 'Pending Approval', 'Pending Approval'
     APPROVED = 'Approved', 'Approved'
-    PACKED = 'Packed', 'Packed'
-    READY_DISPATCH = 'Ready Dispatch', 'Ready Dispatch'
-    LOADED = 'Loaded', 'Loaded'
-    IN_TRANSIT = 'In Transit', 'In Transit'
+    REJECTED = 'Rejected', 'Rejected'
+    BILTY_UPLOADED = 'Bilty Uploaded', 'Bilty Uploaded'
+    READY_DISPATCH = 'Ready to Dispatch', 'Ready to Dispatch'
+    DISPATCHED = 'Dispatched', 'Dispatched'
     DELIVERED = 'Delivered', 'Delivered'
-    INVOICE_GENERATED = 'Invoice Generated', 'Invoice Generated'
-    PAYMENT_PENDING = 'Payment Pending', 'Payment Pending'
-    PAYMENT_COMPLETE = 'Payment Complete', 'Payment Complete'
     CANCELLED = 'Cancelled', 'Cancelled'
-    RETURN = 'Return', 'Return'
 
 class PaymentStatus(models.TextChoices):
     PENDING = 'Pending', 'Pending'
@@ -35,7 +31,7 @@ class Order(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_orders')
     
     order_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.DRAFT)
+    status = models.CharField(max_length=30, choices=OrderStatus.choices, default=OrderStatus.PENDING_APPROVAL)
     payment_status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.PENDING)
     
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
@@ -43,11 +39,22 @@ class Order(models.Model):
     gst_total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     grand_total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     
+    payment_terms = models.CharField(max_length=100, blank=True, null=True, default='Cash (15 Days)')
     remarks = models.TextField(blank=True, null=True)
     
+    # Bilty Tracking (Office Stage)
+    bilty_number = models.CharField(max_length=100, blank=True, null=True)
+    bilty_pdf = models.FileField(upload_to='logistics/bilty/', blank=True, null=True)
+    bilty_date = models.DateTimeField(blank=True, null=True)
+    bilty_uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bilty_orders')
+
+    # LR Tracking (Warehouse Stage)
     transport_details = models.TextField(blank=True, null=True)
+    vehicle_number = models.CharField(max_length=50, blank=True, null=True)
     lr_number = models.CharField(max_length=100, blank=True, null=True)
     lr_receipt_upload = models.FileField(upload_to='logistics/lr/', blank=True, null=True)
+    lr_date = models.DateTimeField(blank=True, null=True)
+    lr_generated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='lr_orders')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

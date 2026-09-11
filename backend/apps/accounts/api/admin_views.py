@@ -127,7 +127,7 @@ class UserManagementListView(APIView):
         username = request.data.get('username')
         password = request.data.get('password', 'ccs12345') # Default password
         phone = request.data.get('phone', '')
-        role = request.data.get('role', UserRole.EMPLOYEE)
+        role = request.data.get('role', 'Employee')
         
         try:
             user = AuthService.register_user(email=email, username=username, password=password, phone=phone, role=role)
@@ -142,12 +142,16 @@ class UserManagementListView(APIView):
                 profile.state = request.data.get('state')
                 profile.district = request.data.get('district')
                 profile.territory = request.data.get('territory')
+                profile.monthly_sales_plan = request.data.get('monthly_sales_plan', 0.00) or 0.00
+                profile.monthly_collection_plan = request.data.get('monthly_collection_plan', 0.00) or 0.00
                 profile.save()
-            elif role == UserRole.EMPLOYEE:
+            elif role in ['Employee', 'EMPLOYEE']:
                 profile, _ = EmployeeProfile.objects.get_or_create(user=user)
                 profile.state = request.data.get('state')
                 profile.district = request.data.get('district')
                 profile.territory = request.data.get('territory')
+                profile.monthly_sales_plan = request.data.get('monthly_sales_plan', 0.00) or 0.00
+                profile.monthly_collection_plan = request.data.get('monthly_collection_plan', 0.00) or 0.00
                 profile.save()
                 
             from ..serializers import UserSerializer
@@ -156,24 +160,26 @@ class UserManagementListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserManagementDetailView(APIView):
-    def get(self, request, user_id):
+    def get(self, request, user_id=None, pk=None):
         if not IsAdminUser.has_permission(request):
             return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
             
+        uid = user_id or pk
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=uid)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
             
         from ..serializers import UserSerializer
         return Response(UserSerializer(user).data)
         
-    def put(self, request, user_id):
+    def put(self, request, user_id=None, pk=None):
         if not IsAdminUser.has_permission(request):
             return Response({"error": "Unauthorized"}, status=status.HTTP_403_FORBIDDEN)
             
+        uid = user_id or pk
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=uid)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
             
@@ -182,6 +188,13 @@ class UserManagementDetailView(APIView):
         user.is_active = request.data.get('is_active', user.is_active)
         user.joining_date = request.data.get('joining_date', user.joining_date)
         
+        # Admin assigned KM rate for employee travel reimbursement
+        if 'km_rate' in request.data and request.data['km_rate'] is not None:
+            try:
+                user.km_rate = float(request.data['km_rate'])
+            except (ValueError, TypeError):
+                pass
+
         if 'role' in request.data:
             user.role = request.data['role']
             
@@ -198,12 +211,20 @@ class UserManagementDetailView(APIView):
             profile.state = request.data.get('state', profile.state)
             profile.district = request.data.get('district', profile.district)
             profile.territory = request.data.get('territory', profile.territory)
+            if 'monthly_sales_plan' in request.data:
+                profile.monthly_sales_plan = request.data.get('monthly_sales_plan') or 0.00
+            if 'monthly_collection_plan' in request.data:
+                profile.monthly_collection_plan = request.data.get('monthly_collection_plan') or 0.00
             profile.save()
-        elif user.role == UserRole.EMPLOYEE:
+        elif user.role in ['Employee', 'EMPLOYEE']:
             profile, _ = EmployeeProfile.objects.get_or_create(user=user)
             profile.state = request.data.get('state', profile.state)
             profile.district = request.data.get('district', profile.district)
             profile.territory = request.data.get('territory', profile.territory)
+            if 'monthly_sales_plan' in request.data:
+                profile.monthly_sales_plan = request.data.get('monthly_sales_plan') or 0.00
+            if 'monthly_collection_plan' in request.data:
+                profile.monthly_collection_plan = request.data.get('monthly_collection_plan') or 0.00
             profile.save()
             
         return Response({"message": "User updated successfully."})

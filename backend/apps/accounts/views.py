@@ -84,11 +84,13 @@ class LoginView(APIView):
             response = Response({
                 "message": "Login successful",
                 "access_token": tokens["access"],
+                "refresh_token": tokens["refresh"],
                 "user": {
                     "id": user.id,
                     "email": user.email,
                     "username": user.username,
                     "role": user.role,
+                    "km_rate": float(user.km_rate) if user.km_rate is not None else None,
                 }
             }, status=status.HTTP_200_OK)
             
@@ -146,4 +148,32 @@ class PublicDealerLocatorView(APIView):
             })
             
         return Response(results, status=status.HTTP_200_OK)
+
+
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.permissions import IsAuthenticated
+
+class CookieTokenRefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        if 'refresh' not in data and 'refresh_token' in request.COOKIES:
+            data['refresh'] = request.COOKIES['refresh_token']
+        serializer = self.get_serializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+class CurrentUserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .serializers import UserSerializer
+        user = request.user
+        data = UserSerializer(user).data
+        data['km_rate'] = float(user.km_rate) if user.km_rate is not None else None
+        return Response(data)
 

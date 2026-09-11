@@ -13,7 +13,18 @@ class Attendance(models.Model):
     check_out = models.TimeField(null=True, blank=True)
     
     check_in_location = models.CharField(max_length=255, null=True, blank=True)
+    check_in_latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    check_in_longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    
     check_out_location = models.CharField(max_length=255, null=True, blank=True)
+    check_out_latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    check_out_longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    
+    current_location = models.CharField(max_length=255, null=True, blank=True)
+    current_latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    current_longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    current_location_timestamp = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
     
     check_in_photo = models.ImageField(upload_to='attendance_photos/', null=True, blank=True)
     check_out_photo = models.ImageField(upload_to='attendance_photos/', null=True, blank=True)
@@ -35,12 +46,19 @@ class Attendance(models.Model):
 class DealerVisit(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dealer_visits')
-    dealer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='visits_received')
+    dealer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='visits_received')
+    
+    visit_type = models.CharField(max_length=50, default='Distributor') # Distributor, Farmer, New Onboard
+    customer_name = models.CharField(max_length=255, blank=True, null=True)
+    customer_mobile = models.CharField(max_length=20, blank=True, null=True)
+    visit_purpose = models.CharField(max_length=150, blank=True, null=True)
     
     date = models.DateField(auto_now_add=True)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     
     notes = models.TextField(blank=True, null=True)
     voice_note = models.FileField(upload_to='visit_voice_notes/', null=True, blank=True)
@@ -48,6 +66,7 @@ class DealerVisit(models.Model):
     next_follow_up = models.DateField(null=True, blank=True)
     
     photo = models.ImageField(upload_to='visit_photos/', null=True, blank=True)
+    video = models.FileField(upload_to='visit_videos/', null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True, related_name='visit_orders')
     
     collection_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -74,11 +93,33 @@ class Expense(models.Model):
     employee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses')
     
     date = models.DateField()
-    category = models.CharField(max_length=20, choices=ExpenseCategory.choices)
+    category = models.CharField(max_length=50, choices=ExpenseCategory.choices)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True, null=True)
     bill = models.FileField(upload_to='expense_bills/', null=True, blank=True)
     
+    # Travel & Vehicle KM fields
+    # Starting and ending KM captured from employee
+    starting_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Trip starting odometer KM")
+    ending_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Trip ending odometer KM")
+    total_km = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Calculated total KM (Ending - Starting)")
+    km_rate = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Admin-assigned rate applied at claim submission time")
+    km_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Total KM * Applied KM Rate")
+    
+    # Fare breakdown amounts
+    bus_train_car_fair = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    fair_cab = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    fair_auto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    other_vehicle_fair = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    food = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    laundry = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    phone_bill = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    internet_bill = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    local_conveyance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    courier = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    photocopy = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    other_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
     status = models.CharField(max_length=20, choices=ExpenseStatus.choices, default=ExpenseStatus.PENDING)
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_expenses')
     

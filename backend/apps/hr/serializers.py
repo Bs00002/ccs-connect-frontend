@@ -17,8 +17,17 @@ class DailyTourPlanSerializer(serializers.ModelSerializer):
         read_only_fields = ('employee', 'status', 'manager_approval')
 
 class AttendanceSerializer(serializers.ModelSerializer):
-    employee_name = serializers.CharField(source='employee.username', read_only=True)
-    
+    employee_id = serializers.UUIDField(source='employee.id', read_only=True)
+    employee_name = serializers.SerializerMethodField()
+    employee_role = serializers.CharField(source='employee.role', read_only=True)
+    employee_email = serializers.CharField(source='employee.email', read_only=True)
+
+    def get_employee_name(self, obj):
+        if obj.employee:
+            full_name = f"{obj.employee.first_name} {obj.employee.last_name}".strip()
+            return full_name or obj.employee.username or obj.employee.email.split('@')[0]
+        return "Employee"
+
     class Meta:
         model = Attendance
         fields = '__all__'
@@ -26,12 +35,15 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
 class DealerVisitSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.username', read_only=True)
-    dealer_name = serializers.CharField(source='dealer.username', read_only=True)
+    dealer_name = serializers.CharField(source='dealer.username', read_only=True, default=None)
     
     class Meta:
         model = DealerVisit
         fields = '__all__'
         read_only_fields = ('employee', 'date')
+        extra_kwargs = {
+            'dealer': {'required': False, 'allow_null': True}
+        }
 
 class ExpenseSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.username', read_only=True)
@@ -41,3 +53,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
         model = Expense
         fields = '__all__'
         read_only_fields = ('employee', 'status', 'approved_by')
+        extra_kwargs = {
+            'date': {'required': False},
+            'amount': {'required': False},
+        }

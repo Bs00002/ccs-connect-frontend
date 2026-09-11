@@ -8,6 +8,7 @@ class UserRole(models.TextChoices):
     ADMIN = 'Admin', _('Admin')
     DISTRIBUTOR = 'Distributor', _('Distributor')
     DEALER = 'Dealer', _('Dealer')
+    WAREHOUSE = 'Warehouse', _('Warehouse')
 
 class UserStatus(models.TextChoices):
     PENDING = 'Pending', _('Pending')
@@ -30,6 +31,7 @@ class User(AbstractUser):
     status = models.CharField(max_length=20, choices=UserStatus.choices, default=UserStatus.PENDING)
     is_verified = models.BooleanField(default=False)
     joining_date = models.DateField(blank=True, null=True)
+    km_rate = models.DecimalField(max_digits=6, decimal_places=2, default=5.00, blank=True, null=True, help_text="Admin-controlled reimbursement rate per KM")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -99,6 +101,8 @@ class DistributorProfile(models.Model):
     
     # Operations
     daily_sales_target = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    monthly_sales_plan = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    monthly_collection_plan = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     has_warehouse = models.BooleanField(default=False)
     vehicles_count = models.IntegerField(default=0)
 
@@ -116,6 +120,8 @@ class EmployeeProfile(models.Model):
     leave_balance = models.IntegerField(default=0)
     performance_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     sales_target = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    monthly_sales_plan = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    monthly_collection_plan = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     employee_document = models.FileField(upload_to='employee/documents/', null=True, blank=True)
 
     def __str__(self):

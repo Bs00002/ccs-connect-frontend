@@ -19,7 +19,7 @@ class DashboardAPIView(APIView):
         
         if role in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
             return self.get_admin_dashboard()
-        elif role in [UserRole.DISTRIBUTOR, UserRole.EMPLOYEE]:
+        elif role == UserRole.DISTRIBUTOR:
             return self.get_employee_dashboard(request.user)
         elif role == UserRole.DEALER:
             return self.get_dealer_dashboard(request.user)
@@ -32,7 +32,7 @@ class DashboardAPIView(APIView):
         
         # Cards
         total_dealers = User.objects.filter(role=UserRole.DEALER).count()
-        total_employees = User.objects.filter(role__in=[UserRole.EMPLOYEE, UserRole.DISTRIBUTOR]).count()
+        total_employees = User.objects.filter(role=UserRole.DISTRIBUTOR).count()
         total_products = Product.objects.count()
         total_orders = Order.objects.count()
         pending_orders = Order.objects.filter(status='Pending').count()
